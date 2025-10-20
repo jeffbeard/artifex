@@ -2,11 +2,11 @@
 
 > *Latin: craftsman, artist, maker*
 
-A collection of Claude Code skills for enhanced productivity and intelligent automation.
+A collection of Claude Code skills for enhanced productivity and intelligent automation, created largely by Claude.
 
 ## What is Artifex?
 
-Artifex is a curated collection of skills that extend Claude Code's capabilities. Skills are modular instruction sets that help Claude perform specialized tasks more effectively—from finding and vetting other skills to organizing files intelligently.
+Artifex is my collection of skills for Claude Code.
 
 ## Available Skills
 
@@ -18,6 +18,19 @@ Artifex is a curated collection of skills that extend Claude Code's capabilities
 - Performs mandatory security assessments on all found skills
 - Provides detailed security guidance for safe skill adoption
 - Rates skills as SAFE, REVIEW NEEDED, or UNSAFE
+
+**Location:** `skills/skill-finder/`
+
+
+### project-namer
+**Description:** Use Claude to generate project names
+
+**Features:**
+- Has a questionnaire that starts with a description of the project or
+  initiative
+- It will ask about languages to use, themes/vibe, whether to consider invented
+  words, and other relevant information.
+- Produces a details list of words with their etymlogy, pronounciation, justification for inclusion, then a top 3 recommendations list.
 
 **Location:** `skills/skill-finder/`
 
@@ -72,20 +85,6 @@ Have a useful skill to share? Contributions are welcome!
 3. Include a `SKILL.md` with proper frontmatter
 4. Submit a pull request
 
-Please ensure your skill follows security best practices and includes clear documentation.
-
-## Skill Structure
-
-Each skill follows this structure:
-
-```
-skills/
-└── skill-name/
-    ├── SKILL.md           # Main skill file with YAML frontmatter
-    ├── scripts/           # Optional: helper scripts
-    ├── references/        # Optional: reference documents
-    └── assets/            # Optional: images, templates, etc.
-```
 
 ## Resources
 
