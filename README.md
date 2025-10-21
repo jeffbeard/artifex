@@ -65,16 +65,6 @@ Once installed, Claude Code automatically discovers and uses skills based on you
 - "Find skills about file organization" → Triggers **skill-finder**
 - Skills load only when needed, keeping context usage efficient
 
-## Security
-
-All skills in this repository follow security best practices:
-- No credential access or harvesting
-- No network calls to unknown domains
-- User confirmation required for destructive operations
-- Read-only operations preferred
-- Transparent about all commands executed
-
-The **skill-finder** skill includes comprehensive security guidance to help you evaluate skills from any source.
 
 ## Contributing
 
