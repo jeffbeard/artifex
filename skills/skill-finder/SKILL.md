@@ -28,15 +28,33 @@ Extract the subject or topic from the user's request. Examples:
 
 ### 2. Search Known Repositories
 
-Consult `references/known-repositories.md` for a list of known skill repositories and marketplaces. Use WebSearch and WebFetch tools to query these sources for relevant skills.
+Consult `references/known-repositories.md` for sources. Use WebSearch and WebFetch tools to query these sources. Follow this prioritized search order:
 
-**Search strategy:**
-1. Start with the superpowers marketplace (if searching for superpowers plugins)
-2. Search GitHub for user-created skills using queries like:
-   - "claude code skill {topic}"
-   - "claude ai skill {topic}"
-   - "{topic} skill claude"
-3. Check community forums and documentation sites
+**Priority 1: Official Sources** (Highest trust, best quality)
+1. Check https://github.com/anthropics/skills for official examples
+2. Search for plugin marketplaces with `.claude-plugin/marketplace.json` files
+3. Review official documentation at https://docs.claude.com/en/docs/claude-code/
+
+**Priority 2: Curated Community Lists** (Vetted, high quality)
+1. Search https://github.com/travisvn/awesome-claude-skills by category
+2. Check https://github.com/obra/superpowers for production-ready skills
+
+**Priority 3: Discovery Websites** (Broad coverage, varying quality)
+1. Search https://skillsmp.com for aggregated skills
+2. Check https://claudecodeplugin.com and https://claudecodemarketplace.com
+
+**Priority 4: GitHub Search** (Unvetted, widest coverage)
+Use queries like:
+- "claude code skill {topic}"
+- "claude-plugin marketplace.json {topic}"
+- ".claude/skills/ {topic}"
+- "anthropic claude skill {topic}"
+
+**Priority 5: MCP Integration** (When topic involves external tools/data)
+If the topic requires external tool or data access:
+1. Search https://mcplist.ai for related MCP servers (775+ available)
+2. Check https://github.com/modelcontextprotocol/servers for official servers
+3. Look for plugins that bundle skills + MCP servers together
 
 ### 3. Fetch and Parse Results
 
@@ -64,28 +82,33 @@ For each skill:
 
 ### 5. Format and Present Results
 
-Display results in a clean, organized format with security status:
+Display results in a clean, organized format with security status and installation instructions:
 
 ```markdown
 ## Skills Found for "{topic}"
 
-### 1. [Skill Name]
+### 1. [Skill/Plugin Name]
 **Description:** Brief description of what the skill does
 **Source:** Link to repository or marketplace
-**Type:** User-created / Marketplace plugin
+**Type:** Official / Curated Community / Plugin / MCP Server / User-created
+**Installation:** `/plugin install <url>` OR Copy to `.claude/skills/` OR Follow repository instructions
 **Security:** ✅ SAFE / ⚠️ REVIEW NEEDED / ❌ UNSAFE
 **Security Notes:** Brief explanation of security assessment
+**Includes:** (If plugin) Skills: X, MCP servers: Y, Commands: Z, Agents: W, Hooks: V
 
-### 2. [Skill Name]
+### 2. [Skill/Plugin Name]
 **Description:** Brief description of what the skill does
 **Source:** Link to repository or marketplace
-**Type:** User-created / Marketplace plugin
+**Type:** Official / Curated Community / Plugin / MCP Server / User-created
+**Installation:** `/plugin install <url>` OR Copy to `.claude/skills/` OR Follow repository instructions
 **Security:** ✅ SAFE / ⚠️ REVIEW NEEDED / ❌ UNSAFE
 **Security Notes:** Brief explanation of security assessment
+**Includes:** (If plugin) Skills: X, MCP servers: Y, Commands: Z, Agents: W, Hooks: V
 
 ---
 
-**Total found:** X skills
+**Total found:** X skills/plugins
+**Note:** Plugins bundle multiple components (skills, MCP servers, commands, agents, hooks)
 ```
 
 If no skills are found, suggest:
@@ -101,6 +124,72 @@ If no skills are found, suggest:
 - Consider alternative names for the same functionality
 - When results are limited, broaden the search to adjacent topics
 
+## Modern Discovery Patterns
+
+### Skills vs Plugins
+Understanding the distinction helps with effective searching:
+
+- **Skills:** Individual task instructions contained in `SKILL.md` files
+  - Location: `.claude/skills/` directory
+  - Format: Markdown with YAML frontmatter
+  - Scope: Single, focused capability
+
+- **Plugins:** Bundled packages containing multiple components
+  - Location: Defined in `.claude-plugin/` directory with `marketplace.json`
+  - Components: Skills + MCP servers + slash commands + agents + hooks
+  - Installation: `/plugin install <url>` command
+  - Scope: Complete workflows or feature sets
+
+**Search tip:** Look for both `.claude/skills/` and `.claude-plugin/` directories when searching repositories.
+
+### Using Curated Lists First
+Start with vetted sources before broad searches to save time and reduce security risk:
+
+1. **Official Anthropic sources** (github.com/anthropics/skills)
+   - Best quality control
+   - Production-ready examples
+   - Active maintenance
+
+2. **Curated community lists** (awesome-claude-skills, superpowers)
+   - Security pre-vetted
+   - Community tested
+   - Organized by category
+
+3. **Discovery websites** (skillsmp.com, etc.)
+   - Broader coverage
+   - May have varying quality
+   - Good for discovering new skills
+
+4. **Open GitHub search**
+   - Widest coverage
+   - Unvetted content
+   - Requires careful security review
+
+### MCP + Skills Integration
+Many modern workflows combine both components for complete solutions:
+
+- **Skills:** Provide instructions on how Claude should complete tasks
+- **MCP servers:** Give Claude access to external tools, APIs, and data sources
+- **Combined in plugins:** Often bundled together for seamless workflows
+
+**When to search for both:**
+- Tasks requiring external data (databases, APIs, file systems)
+- Workflows needing specialized tools (Git, testing frameworks, deployment)
+- Integration scenarios (connecting to third-party services)
+
+**Search strategy:**
+1. First search for skills addressing your task
+2. If the skill needs external access, search MCP directories (mcplist.ai)
+3. Look for existing plugins that bundle both together
+
+### Plugin Marketplace Discovery
+The new plugin system enables modular, installable packages:
+
+- **Format:** Repositories with `.claude-plugin/marketplace.json` files
+- **Installation:** Single command: `/plugin install <url>`
+- **Benefits:** Bundled dependencies, version control, easy updates
+- **Search queries:** Include "marketplace.json" or ".claude-plugin" in searches
+
 ## Security Guidance
 
 ### Overview
@@ -112,8 +201,10 @@ Skills are Markdown instruction files that Claude reads to extend functionality.
 When reviewing a skill, check for these elements:
 
 #### 1. Source Verification
-- **✅ SAFE:** Official Anthropic repositories (github.com/anthropics/skills)
-- **✅ SAFE:** Superpowers marketplace (github.com/superpowers-ai)
+- **✅ SAFE:** Official Anthropic repositories (github.com/anthropics/*)
+- **✅ SAFE:** Curated community lists (awesome-claude-skills, superpowers)
+- **✅ SAFE:** Official MCP servers (github.com/modelcontextprotocol/servers)
+- **⚠️ REVIEW:** Marketplace plugins from unknown sources
 - **⚠️ REVIEW:** Well-known community contributors with reputation
 - **⚠️ REVIEW:** New or unknown contributors
 - **❌ UNSAFE:** Anonymous sources or suspicious URLs
