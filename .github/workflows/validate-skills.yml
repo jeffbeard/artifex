@@ -1,0 +1,64 @@
+name: Validate Skills
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'skills/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate skill structure
+        run: |
+          # Find all skill directories (exclude .zip files and hidden dirs)
+          for skill_dir in skills/*/; do
+            # Skip if not a directory or if it's a hidden directory
+            if [ ! -d "$skill_dir" ] || [[ "$skill_dir" == */. ]] || [[ "$skill_dir" == */.* ]]; then
+              continue
+            fi
+
+            skill_name=$(basename "$skill_dir")
+            echo "Validating skill: $skill_name"
+
+            # Check for SKILL.md
+            if [ ! -f "${skill_dir}SKILL.md" ]; then
+              echo "❌ ERROR: ${skill_name} missing SKILL.md"
+              exit 1
+            fi
+
+            # Check for valid YAML frontmatter
+            if ! head -n 1 "${skill_dir}SKILL.md" | grep -q "^---$"; then
+              echo "❌ ERROR: ${skill_name} SKILL.md missing YAML frontmatter"
+              exit 1
+            fi
+
+            # Check for required frontmatter fields
+            if ! grep -q "^name:" "${skill_dir}SKILL.md"; then
+              echo "❌ ERROR: ${skill_name} SKILL.md missing 'name' field"
+              exit 1
+            fi
+
+            if ! grep -q "^description:" "${skill_dir}SKILL.md"; then
+              echo "❌ ERROR: ${skill_name} SKILL.md missing 'description' field"
+              exit 1
+            fi
+
+            echo "✅ ${skill_name} is valid"
+          done
+
+          echo "✅ All skills validated successfully!"
