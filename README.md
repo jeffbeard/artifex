@@ -32,7 +32,20 @@ Artifex is my collection of skills for Claude Code.
   words, and other relevant information.
 - Produces a details list of words with their etymlogy, pronounciation, justification for inclusion, then a top 3 recommendations list.
 
-**Location:** `skills/skill-finder/`
+**Location:** `skills/project-namer/`
+
+### arxiv-search
+**Description:** Search and retrieve academic papers from ArXiv (arxiv.org).
+
+**Features:**
+- Search by keywords, authors, categories, or ArXiv IDs
+- Dual approach: Direct API access or bundled Python script
+- Support for boolean operators and advanced queries
+- Retrieve paper metadata, abstracts, and PDF links
+- Comprehensive API reference with full category taxonomy
+- No dependency on unstable MCP servers
+
+**Location:** `skills/arxiv-search/`
 
 ## Installation
 
