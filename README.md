@@ -49,26 +49,29 @@ Artifex is my collection of skills for Claude Code.
 
 ## Installation
 
-### Installing Individual Skills
+Artifex is a Claude Code plugin marketplace. Install all skills in one shot from inside Claude Code:
 
-Copy any skill directory from this repository to your Claude Code skills location:
-
-```bash
-# For personal skills (available across all projects)
-cp -r skills/skill-finder ~/.claude/skills/
-
-# For project skills (shared with your team via git)
-cp -r skills/skill-finder ./.claude/skills/
+```
+/plugin marketplace add github:jeffbeard/artifex
+/plugin install artifex@artifex
 ```
 
-### Installing All Skills
+To pull updates later:
+
+```
+/plugin marketplace update artifex
+```
+
+### Manual installation (alternative)
+
+You can still copy individual skill directories if you prefer not to use the plugin system:
 
 ```bash
-# Personal installation
-cp -r skills/* ~/.claude/skills/
+# Personal (available across all projects)
+cp -r skills/skill-finder ~/.claude/skills/
 
-# Project installation
-cp -r skills/* ./.claude/skills/
+# Project-local (shared via git)
+cp -r skills/skill-finder ./.claude/skills/
 ```
 
 ## Using Skills
