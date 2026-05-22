@@ -1,0 +1,24 @@
+{
+  "name": "artifex",
+  "owner": {
+    "name": "Jeff Beard"
+  },
+  "metadata": {
+    "description": "Jeff Beard's Claude Code skills collection",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "artifex",
+      "source": "./",
+      "description": "Claude Code skills: skill-finder (discovery + security review), project-namer (etymologically-grounded naming), and arxiv-search (academic paper search)",
+      "version": "0.1.0",
+      "strict": false,
+      "skills": [
+        "./skills/arxiv-search",
+        "./skills/project-namer",
+        "./skills/skill-finder"
+      ]
+    }
+  ]
+}
