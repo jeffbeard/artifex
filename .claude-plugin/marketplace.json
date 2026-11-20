@@ -19,6 +19,17 @@
         "./skills/project-namer",
         "./skills/skill-finder"
       ]
+    },
+    {
+      "name": "synoptix-agent-review",
+      "source": "./",
+      "description": "Cross-agent review skills: agy-review (read-only review from the Antigravity CLI) and consensus-review (Codex, agy, and Claude review independently, debate disagreements, and report decisions)",
+      "version": "0.1.0",
+      "strict": false,
+      "skills": [
+        "./skills/agy-review",
+        "./skills/consensus-review"
+      ]
     }
   ]
 }
