@@ -85,6 +85,9 @@ Weather and atmosphere vocabulary, for use as project names or as roots for inve
 | Helm | Cumbria, England | Strong north-easterly off Cross Fell | English; the only named wind in Britain |
 | Elephanta | Malabar coast | Southerly at the end of the monsoon | The Elephanta Islands |
 | Trade winds | Tropics | Steady easterlies | Middle English *trade*, "path" |
+| Prevailing wind | Anywhere | The direction that dominates a place over time | English |
+| Crosswind | Anywhere | Wind across the direction of travel | English |
+| Headwind, Tailwind | Anywhere | Wind against or with the direction of travel | English |
 | Alizé | Tropics | French name for the trade wind | French |
 | Westerlies | Mid-latitudes | Prevailing west winds | English |
 
@@ -123,7 +126,7 @@ Cyclone, Anticyclone, Typhoon, Hurricane, Tornado, Waterspout, Landspout, Gustna
 
 ## Atmospheric structure and dynamics
 
-Troposphere, Tropopause, Stratosphere, Mesosphere, Thermosphere, Exosphere, Ionosphere, Jet stream, Front, Occlusion, Ridge, Trough, Col, Isobar, Isotherm, Isohyet (equal rainfall), Isotach (equal wind speed), Gradient, Inversion, Lapse rate, Dew point, Albedo, Insolation, Coriolis, Rossby wave, Hadley cell, Ferrel cell, Polar vortex, Geostrophic, Katabatic (downslope), Anabatic (upslope), Adiabatic, Orographic, Synoptic, Mesoscale, Boundary layer, Ekman spiral, El Niño, La Niña, Oscillation.
+Troposphere, Tropopause, Stratosphere, Mesosphere, Thermosphere, Exosphere, Ionosphere, Jet stream, Front, Occlusion, Ridge, Trough, Col, Isobar, Isotherm, Isohyet (equal rainfall), Isotach (equal wind speed), Gradient, Inversion, Lapse rate, Dew point, Albedo, Insolation, Coriolis, Rossby wave, Hadley cell, Ferrel cell, Polar vortex, Geostrophic, Katabatic (downslope), Anabatic (upslope), Adiabatic, Orographic, Synoptic, Mesoscale, Boundary layer, Ekman spiral, El Niño, La Niña, Oscillation, Convergence (flows meeting and rising), Divergence, Confluence, Triple point (where cold, warm, and occluded fronts meet), Occluded front, Squall line, Synoptic hour (the fixed time when all stations observe at once), Synoptic chart, Wind rose (diagram of wind directions at one place).
 
 ## Light, sky, and electricity
 
@@ -131,7 +134,15 @@ Aurora, Borealis, Australis, Halo, Sundog, Parhelion, Paraselene (moon dog), Cor
 
 ## Instruments and measures
 
-Barometer, Aneroid, Anemometer, Hygrometer, Psychrometer, Pluviometer, Ceilometer, Radiosonde, Rawinsonde, Dropsonde, Theodolite, Nephoscope, Pyranometer, Heliograph, Stevenson screen, Windsock, Weathervane, Beaufort, Fujita, Saffir-Simpson, Okta (eighth of sky covered), Millibar, Hectopascal, Knot, METAR, Isobar.
+Barometer, Aneroid, Anemometer, Hygrometer, Psychrometer, Pluviometer, Ceilometer, Radiosonde, Rawinsonde, Dropsonde, Theodolite, Nephoscope, Pyranometer, Heliograph, Stevenson screen, Windsock, Weathervane, Weathercock, Weather glass, Beaufort, Fujita, Saffir-Simpson, Okta (eighth of sky covered), Millibar, Hectopascal, Knot, METAR, Isobar.
+
+## Two-word terms and idioms
+
+Ready-made pairs for two-word codenames:
+
+Terms of art: Triple Point, Synoptic Hour, Occluded Front, Squall Line, Dew Point, Lapse Rate, Jet Stream, Polar Vortex, Trade Wind, Prevailing Wind, Wind Rose, Mackerel Sky, Mare's Tail, Anvil Cloud, Shelf Cloud, Green Flash, Sun Pillar, Ball Lightning, Rain Shadow, Cold Front, Heat Dome, Gust Front, Weather Eye, Weather Glass.
+
+Idioms: Fair Weather, Weather Eye, Second Wind, Tail Wind, Silver Lining, Cloud Nine, Rain Check, Snow Job, Lightning Rod, Perfect Storm, Dry Spell, Cold Snap, Indian Summer (avoid), Calm Before, Eye of the Storm (three words, usable as "Storm Eye").
 
 ## Beaufort scale
 

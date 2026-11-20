@@ -157,19 +157,26 @@ Construction:
 - Prefer a stress pattern that is easy to say aloud. Read each one out as "Operation ___" before keeping it.
 - Do not reuse the name of a real military operation (Overlord, Desert Storm, Barbarossa, Rolling Thunder, Market Garden).
 
+Where to look first, in order:
+1. **Existing two-word terms of art** from the project's field or a selected word list ("Triple Point", "Synoptic Hour", "Occluded Front"). They already mean something as a pair.
+2. **Idioms and set phrases** ("Second Opinion", "Lead Balloon", "Anvil Chorus"). Same advantage, and no explanation needed.
+3. **Built pairs**, using the register table below. These are the weakest source: keep one only if the pair reads as a phrase and not as two words side by side.
+
+At least half of the codenames should come from sources 1 and 2.
+
 The Tone answer sets the register:
 
 | Tone | Register | How to build it | Examples |
 |---|---|---|---|
 | Professional | Solemn, in earnest | Virtue or quality + force or landmark. No irony | Steady Lantern, Iron Covenant, Quiet Bastion |
-| Balanced | Evocative, neutral | Material or colour + phenomenon or object. Sounds good, promises nothing | Cobalt Squall, Amber Ridge, Osmium Front |
+| Balanced | Evocative, neutral | A term of art or mild idiom, or one word for what the project does + one concrete image. Sounds good, promises nothing | Synoptic Hour, Anvil Chorus, Crosswind Counsel, Cobalt Squall |
 | Creative | Deadpan, self-deprecating | An idiom for failure or mess, or a grand word beside a deflating one. The joke is that it is said with a straight face | Lead Balloon, Steaming Pile, Soggy Triumph, Majestic Shrug |
 | Technical | Dry, in-joke | A failure mode or jargon term + something incongruously pleasant or grand | Graceful Segfault, Null Sunrise, Orphan Parade |
 
 For the Creative register: aim the joke at the project or the work, never at people or groups. Keep it something the user could say in a meeting. Offer a range, from mild ("Modest Proposal") to blunt ("Steaming Pile"), and say which is which in the notes.
 
 How the other answers apply:
-- **Length** applies to each word, not the pair. "Short" means two short words.
+- **Length** applies to the slug as a whole, hyphen included: Short is up to 12 characters (`lead-balloon`), Medium up to 18 (`crosswind-counsel`), Long anything over. It never overrides the 1 to 3 syllable rule, and a strong idiom or term of art beats the length preference: say so in the notes when a pick is outside the range.
 - **Word lists** supply one or both words: an element as the material, a weather term as the phenomenon ("Argon Haboob", "Bismuth Halo", "Tin Derecho"). The collision tables matter less here, since a pair is far more distinctive than either word alone.
 - **Languages** still apply, but favour plain English for at least one of the two words so the name stays sayable.
 - **Invented words** do not apply to codenames. Use real words only.
