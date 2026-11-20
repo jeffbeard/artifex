@@ -31,6 +31,7 @@ Artifex is my collection of skills for Claude Code.
 - It will ask about languages to use, themes/vibe, whether to consider invented
   words, and other relevant information.
 - Produces a details list of words with their etymlogy, pronounciation, justification for inclusion, then a top 3 recommendations list.
+- Optional themed word lists: periodic table elements and meteorological terms, each with word origins and name-collision warnings.
 
 **Location:** `skills/project-namer/`
 

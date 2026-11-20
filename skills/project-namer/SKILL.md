@@ -1,6 +1,6 @@
 ---
 name: project-namer
-description: Generate creative, meaningful project names through a guided questionnaire. Draws from multiple language traditions (Latin, Greek, Norse, Gaelic, etc.) and provides etymology for each suggestion. Perfect for naming software projects, products, repositories, or any creative endeavor.
+description: Generate creative, meaningful project names through a guided questionnaire. Draws from multiple language traditions (Latin, Greek, Norse, Gaelic, etc.) and optional themed word lists (periodic table elements, meteorological terms), and provides etymology for each suggestion. Perfect for naming software projects, products, repositories, or any creative endeavor.
 ---
 
 # Project Namer
@@ -17,6 +17,7 @@ Use this skill when:
 - Want creative names with meaningful origins
 - Need multiple options to choose from
 - Prefer names with linguistic depth (Latin, Greek, Norse, Gaelic, etc.)
+- Want names from a themed vocabulary, such as chemical elements or weather terms
 
 ## Workflow
 
@@ -30,19 +31,24 @@ First, understand what the user is trying to name by asking open-ended questions
 
 ### 2. Run the Questionnaire
 
-Use the AskUserQuestion tool to present a structured questionnaire with these questions:
+Use the AskUserQuestion tool. It accepts at most 4 questions per call and 2 to 4 options per question, so the 7 questions go out in two calls:
+
+- **Call 1:** Theme, Directness, Tone, Length
+- **Call 2:** Languages, Word Lists, Invented Words
+
+The tool adds an "Other" choice to every question on its own. Do not add one, and do not add options beyond the four listed. If the user's free-text answer names something outside the options (a different theme, another language), use it as given.
+
+Skip any question the user has already answered in their request.
 
 #### Question 1: Theme/Vibe
 **Question:** "What vibe or theme should the name convey for your project?"
 **Header:** "Theme"
 **multiSelect:** false
 **Options:**
-1. **Discovery & exploration** - Names that evoke finding, seeking, or uncovering (e.g., Latin 'inveni' = I found)
-2. **Tools & craft** - Names related to tools, building, or craftsmanship (e.g., Norse 'smiðr' = craftsman)
-3. **Wisdom & knowledge** - Names associated with learning, wisdom, or insight (e.g., Greek 'sophia' = wisdom)
-4. **Speed & efficiency** - Names suggesting quickness, agility, or streamlined work (e.g., Latin 'celer' = swift)
-5. **Power & strength** - Names conveying force, capability, or robustness (e.g., Norse 'þórr' = thunder)
-6. **Creativity & art** - Names related to creation, beauty, or artistic expression (e.g., Latin 'ars' = art)
+1. **Discovery & knowledge** - Finding, seeking, learning, insight (e.g., Latin 'inveni' = I found, Greek 'sophia' = wisdom)
+2. **Craft & creativity** - Tools, building, making, artistic expression (e.g., Norse 'smiðr' = craftsman, Latin 'ars' = art)
+3. **Speed & efficiency** - Quickness, agility, streamlined work (e.g., Latin 'celer' = swift)
+4. **Power & strength** - Force, capability, robustness (e.g., Norse 'þórr' = thunder)
 
 #### Question 2: Explicitness
 **Question:** "How directly should the name reference what your project does?"
@@ -64,19 +70,7 @@ Use the AskUserQuestion tool to present a structured questionnaire with these qu
 3. **Creative** - Memorable, shows personality, perhaps whimsical (e.g., 'spotify', 'slack')
 4. **Technical** - Appeals to developers, embraces jargon (e.g., 'webpack', 'rustc')
 
-#### Question 4: Language Traditions
-**Question:** "Which language traditions should I draw from? (Select all that apply)"
-**Header:** "Languages"
-**multiSelect:** true
-**Options:**
-1. **Latin** - Classical, scholarly, widely recognized (e.g., 'opus', 'nexus', 'lumen')
-2. **Ancient Greek** - Philosophical, technical, academic (e.g., 'tekne', 'logos', 'sophia')
-3. **Old Norse** - Strong, mythological, unique (e.g., 'skjold', 'rune', 'saga')
-4. **Gaelic** (Irish/Scottish) - Poetic, distinctive, Celtic (e.g., 'ceardlann', 'fios', 'aisling')
-5. **Old English** - Foundational, familiar, Anglo-Saxon (e.g., 'craft', 'loom', 'wyrd')
-6. **Modern English** - Contemporary, accessible, clear
-
-#### Question 5: Word Length
+#### Question 4: Word Length
 **Question:** "What length should the project name be?"
 **Header:** "Length"
 **multiSelect:** false
@@ -86,7 +80,30 @@ Use the AskUserQuestion tool to present a structured questionnaire with these qu
 3. **Long** (11+ letters) - Descriptive, compound words OK (e.g., 'thunderbird', 'elasticsearch')
 4. **Flexible** - Any length that fits the concept
 
-#### Question 6: Invented Words
+#### Question 5: Language Traditions
+**Question:** "Which language traditions should I draw from? (Select all that apply)"
+**Header:** "Languages"
+**multiSelect:** true
+**Options:**
+1. **Classical (Latin & Ancient Greek)** - Scholarly, technical, widely recognized (e.g., 'opus', 'nexus', 'logos', 'sophia')
+2. **Germanic (Old Norse & Old English)** - Strong, mythological, earthy (e.g., 'rune', 'saga', 'loom', 'wyrd')
+3. **Gaelic (Irish & Scottish)** - Poetic, distinctive, Celtic (e.g., 'ceardlann', 'fios', 'aisling')
+4. **Modern English** - Contemporary, accessible, clear
+
+Within a selected pair, draw from both languages unless the user narrows it.
+
+#### Question 6: Word Lists
+**Question:** "Should I also draw from a themed word list? (Select all that apply)"
+**Header:** "Word lists"
+**multiSelect:** true
+**Options:**
+1. **Periodic table elements** - Element names, symbols, and their Latin forms (e.g., 'osmium', 'xenon', 'aurum')
+2. **Meteorological terms** - Winds, clouds, storms, and sky phenomena (e.g., 'mistral', 'virga', 'derecho')
+3. **None** - Use only the language traditions selected above
+
+Skip this question when the user has already named a word list in their request, and treat that list as selected.
+
+#### Question 7: Invented Words
 **Question:** "Should I include invented/constructed words in the suggestions?"
 **Header:** "Invented"
 **multiSelect:** false
@@ -99,6 +116,23 @@ Use the AskUserQuestion tool to present a structured questionnaire with these qu
 ### 3. Generate Name Suggestions
 
 Based on the questionnaire responses and initial context, generate exactly **10 project name suggestions**.
+
+**Regarding Word Lists:**
+
+When a word list is selected, read its reference file before generating. Do not work from memory: the files hold the full lists, the origin of each word, and collision warnings.
+
+| Word list | Reference file |
+|---|---|
+| Periodic table elements | `references/periodic-elements.md` |
+| Meteorological terms | `references/meteorological-terms.md` |
+
+- One list selected: at least 5 of the 10 names come from it, or are built on a root from it.
+- Both lists selected: at least 3 names from each.
+- The user asked for a list by name ("name it after an element"): all 10 come from that list.
+- Pick words by meaning first. The word's origin or the behaviour of the thing it names has to connect to the project, and "Why it fits" states that connection.
+- Check each pick against the file's collision table. Mention any collision in the notes, and prefer the low-collision words when distinctiveness matters.
+- Word lists combine with the other answers. Length and tone still apply. With invented words allowed, list words can be blended or modified (e.g., "Osmia", "Virgo-", "Cirrova"), marked "(Invented, from ...)".
+- In the heading line, give the list in place of the language: "(Element 76: Greek *osme*, smell)" or "(Meteorology: Occitan, masterly wind)".
 
 **Regarding Invented Words:**
 - If user selected "Yes, include invented words" - Generate 7-10 invented words using the techniques below
@@ -237,12 +271,13 @@ Before suggesting a name, consider:
 **Context:** CLI tool for managing environment variables across projects
 
 **Questionnaire Results:**
-- Theme: Tools & craft
+- Theme: Craft & creativity
 - Directness: Subtle reference
 - Tone: Technical
-- Languages: Latin, Old Norse
+- Languages: Classical, Germanic
 - Length: Short
 - Invented words: Mix of real and invented
+- Word lists: None
 
 **Sample Suggestions:**
 - **envoy** (French via Latin: messenger) - Carries your environment settings
@@ -256,18 +291,39 @@ Before suggesting a name, consider:
 **Context:** Design system for building beautiful documentation
 
 **Questionnaire Results:**
-- Theme: Creativity & art
+- Theme: Craft & creativity
 - Directness: Abstract/Poetic
 - Tone: Creative
-- Languages: Greek, Latin, Modern English
+- Languages: Classical, Modern English
 - Length: Medium
 - Invented words: Only real words
+- Word lists: None
 
 **Sample Suggestions:**
 - **chronicle** (Greek via Latin: time + writing) - Documents your project's story
 - **papyrus** (Greek/Latin: ancient writing material) - Foundation for beautiful docs
 - **eloquent** (Latin: speaking out) - Helps projects speak clearly
 - **canvas** (Latin via Old French: cloth for painting) - Blank surface for documentation art
+
+### Example 3: Word Lists
+
+**Context:** Background job scheduler that retries failed work
+
+**Questionnaire Results:**
+- Theme: Power & strength
+- Directness: Subtle reference
+- Tone: Balanced
+- Languages: Classical
+- Length: Flexible
+- Invented words: Only real words
+- Word lists: Periodic table elements, Meteorological terms
+
+**Sample Suggestions:**
+- **rhenium** (Element 75: Latin *Rhenus*, the Rhine) - Among the highest melting and boiling points of any element; keeps working under heat
+- **tantalum** (Element 73: Tantalus of Greek myth) - Tantalus reached forever without giving up; the metal resists nearly all corrosion
+- **etesian** (Meteorology: Greek *etesios*, annual) - The wind that returns on schedule every summer
+- **squall** (Meteorology: sudden burst of wind) - Short bursts of work; note the destructive connotation
+- **okta** (Meteorology: one eighth of sky covered) - A unit of coverage; short and free of collisions
 
 ## Tips for Success
 
@@ -278,3 +334,4 @@ Before suggesting a name, consider:
 5. **Respect preferences** - If user has strong language preferences, honor them
 6. **Provide variety** - Include safe choices and bold choices in your 10
 7. **Etymology matters** - The story behind a name makes it more meaningful and memorable
+8. **Read the word list files** - When a word list is selected, load its reference file instead of recalling the list
