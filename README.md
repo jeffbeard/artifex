@@ -49,6 +49,37 @@ Artifex is my collection of skills for Claude Code.
 
 **Location:** `skills/arxiv-search/`
 
+## Synoptix: multi-agent code review
+
+*Synoptix* is the working brand for the two cross-agent review skills below, which ship together as the `cross-agent` plugin. The name is from *synoptic*, Greek for "seeing all together": a synoptic chart puts many independent observations on one map. It is reserved as the project name if these skills are ever split into their own repository.
+
+### agy-review
+**Description:** Get a read-only review from the Antigravity CLI (`agy`), with every finding verified before it is reported.
+
+**Features:**
+- Reviews uncommitted changes, a branch diff, or an OpenSpec change
+- Runs agy headless in sandbox and plan mode, never with permission bypass
+- Marks each finding confirmed, unconfirmed, or wrong against the actual code
+- Saves prompts and raw responses under `.agent-reviews/<timestamp>/`
+
+**Requires:** `agy` installed and signed in.
+
+**Location:** `skills/agy-review/`
+
+### consensus-review
+**Description:** Codex, agy, and Claude review the same target independently, debate the disagreements, and report a decision for every proposed change.
+
+**Features:**
+- Parallel, isolated reviews in a shared finding format
+- One debate round on disputed and unverified items, by resuming each reviewer's session
+- Decision table with justifications, unresolved items, and an ordered final changeset
+- Carries on when a reviewer is missing or times out, and says who was unavailable
+- Never edits files without confirmation
+
+**Requires:** `codex` and/or `agy` installed and signed in, plus the `agy-review` skill (same plugin).
+
+**Location:** `skills/consensus-review/`
+
 ## Installation
 
 Artifex is a Claude Code plugin marketplace. Install all skills in one shot from inside Claude Code:
@@ -56,6 +87,12 @@ Artifex is a Claude Code plugin marketplace. Install all skills in one shot from
 ```
 /plugin marketplace add github:jeffbeard/artifex
 /plugin install artifex@artifex
+```
+
+The cross-agent review skills (`agy-review`, `consensus-review`) ship as a separate plugin, `cross-agent`:
+
+```
+/plugin install cross-agent@artifex
 ```
 
 To pull updates later:
@@ -81,6 +118,8 @@ cp -r skills/skill-finder ./.claude/skills/
 Once installed, Claude Code automatically discovers and uses skills based on your requests. For example:
 
 - "Find skills about file organization" → Triggers **skill-finder**
+- "Ask agy to review the current OpenSpec change" → Triggers **agy-review**
+- "Ask codex and agy to review this before we open a PR and come to a consensus" → Triggers **consensus-review**
 - Skills load only when needed, keeping context usage efficient
 
 
