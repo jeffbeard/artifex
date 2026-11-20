@@ -1,6 +1,6 @@
 ---
 name: project-namer
-description: Generate creative, meaningful project names through a guided questionnaire. Draws from multiple language traditions (Latin, Greek, Norse, Gaelic, etc.) and provides etymology for each suggestion. Perfect for naming software projects, products, repositories, or any creative endeavor.
+description: Generate creative, meaningful project names through a guided questionnaire. Draws from multiple language traditions (Latin, Greek, Norse, Gaelic, etc.) and optional themed word lists (periodic table elements, meteorological terms), can produce two-word operation-style codenames ("Operation Lead Balloon"), and provides etymology for each suggestion. Perfect for naming software projects, products, repositories, or any creative endeavor.
 ---
 
 # Project Namer
@@ -17,6 +17,8 @@ Use this skill when:
 - Want creative names with meaningful origins
 - Need multiple options to choose from
 - Prefer names with linguistic depth (Latin, Greek, Norse, Gaelic, etc.)
+- Want names from a themed vocabulary, such as chemical elements or weather terms
+- Want a two-word codename in the style of a military operation
 
 ## Workflow
 
@@ -30,19 +32,24 @@ First, understand what the user is trying to name by asking open-ended questions
 
 ### 2. Run the Questionnaire
 
-Use the AskUserQuestion tool to present a structured questionnaire with these questions:
+Use the AskUserQuestion tool. It accepts at most 4 questions per call and 2 to 4 options per question, so the 8 questions go out in two calls:
+
+- **Call 1:** Theme, Directness, Tone, Length
+- **Call 2:** Languages, Word Lists, Invented Words, Name Format
+
+The tool adds an "Other" choice to every question on its own. Do not add one, and do not add options beyond the four listed. If the user's free-text answer names something outside the options (a different theme, another language), use it as given.
+
+Skip any question the user has already answered in their request.
 
 #### Question 1: Theme/Vibe
 **Question:** "What vibe or theme should the name convey for your project?"
 **Header:** "Theme"
 **multiSelect:** false
 **Options:**
-1. **Discovery & exploration** - Names that evoke finding, seeking, or uncovering (e.g., Latin 'inveni' = I found)
-2. **Tools & craft** - Names related to tools, building, or craftsmanship (e.g., Norse 'smiðr' = craftsman)
-3. **Wisdom & knowledge** - Names associated with learning, wisdom, or insight (e.g., Greek 'sophia' = wisdom)
-4. **Speed & efficiency** - Names suggesting quickness, agility, or streamlined work (e.g., Latin 'celer' = swift)
-5. **Power & strength** - Names conveying force, capability, or robustness (e.g., Norse 'þórr' = thunder)
-6. **Creativity & art** - Names related to creation, beauty, or artistic expression (e.g., Latin 'ars' = art)
+1. **Discovery & knowledge** - Finding, seeking, learning, insight (e.g., Latin 'inveni' = I found, Greek 'sophia' = wisdom)
+2. **Craft & creativity** - Tools, building, making, artistic expression (e.g., Norse 'smiðr' = craftsman, Latin 'ars' = art)
+3. **Speed & efficiency** - Quickness, agility, streamlined work (e.g., Latin 'celer' = swift)
+4. **Power & strength** - Force, capability, robustness (e.g., Norse 'þórr' = thunder)
 
 #### Question 2: Explicitness
 **Question:** "How directly should the name reference what your project does?"
@@ -64,19 +71,7 @@ Use the AskUserQuestion tool to present a structured questionnaire with these qu
 3. **Creative** - Memorable, shows personality, perhaps whimsical (e.g., 'spotify', 'slack')
 4. **Technical** - Appeals to developers, embraces jargon (e.g., 'webpack', 'rustc')
 
-#### Question 4: Language Traditions
-**Question:** "Which language traditions should I draw from? (Select all that apply)"
-**Header:** "Languages"
-**multiSelect:** true
-**Options:**
-1. **Latin** - Classical, scholarly, widely recognized (e.g., 'opus', 'nexus', 'lumen')
-2. **Ancient Greek** - Philosophical, technical, academic (e.g., 'tekne', 'logos', 'sophia')
-3. **Old Norse** - Strong, mythological, unique (e.g., 'skjold', 'rune', 'saga')
-4. **Gaelic** (Irish/Scottish) - Poetic, distinctive, Celtic (e.g., 'ceardlann', 'fios', 'aisling')
-5. **Old English** - Foundational, familiar, Anglo-Saxon (e.g., 'craft', 'loom', 'wyrd')
-6. **Modern English** - Contemporary, accessible, clear
-
-#### Question 5: Word Length
+#### Question 4: Word Length
 **Question:** "What length should the project name be?"
 **Header:** "Length"
 **multiSelect:** false
@@ -86,7 +81,30 @@ Use the AskUserQuestion tool to present a structured questionnaire with these qu
 3. **Long** (11+ letters) - Descriptive, compound words OK (e.g., 'thunderbird', 'elasticsearch')
 4. **Flexible** - Any length that fits the concept
 
-#### Question 6: Invented Words
+#### Question 5: Language Traditions
+**Question:** "Which language traditions should I draw from? (Select all that apply)"
+**Header:** "Languages"
+**multiSelect:** true
+**Options:**
+1. **Classical (Latin & Ancient Greek)** - Scholarly, technical, widely recognized (e.g., 'opus', 'nexus', 'logos', 'sophia')
+2. **Germanic (Old Norse & Old English)** - Strong, mythological, earthy (e.g., 'rune', 'saga', 'loom', 'wyrd')
+3. **Gaelic (Irish & Scottish)** - Poetic, distinctive, Celtic (e.g., 'ceardlann', 'fios', 'aisling')
+4. **Modern English** - Contemporary, accessible, clear
+
+Within a selected pair, draw from both languages unless the user narrows it.
+
+#### Question 6: Word Lists
+**Question:** "Should I also draw from a themed word list? (Select all that apply)"
+**Header:** "Word lists"
+**multiSelect:** true
+**Options:**
+1. **Periodic table elements** - Element names, symbols, and their Latin forms (e.g., 'osmium', 'xenon', 'aurum')
+2. **Meteorological terms** - Winds, clouds, storms, and sky phenomena (e.g., 'mistral', 'virga', 'derecho')
+3. **None** - Use only the language traditions selected above
+
+Skip this question when the user has already named a word list in their request, and treat that list as selected.
+
+#### Question 7: Invented Words
 **Question:** "Should I include invented/constructed words in the suggestions?"
 **Header:** "Invented"
 **multiSelect:** false
@@ -96,9 +114,79 @@ Use the AskUserQuestion tool to present a structured questionnaire with these qu
 3. **Only real words** - Stick to actual words from the selected language traditions
 4. **Surprise me** - Use your judgment based on the project context
 
+#### Question 8: Name Format
+**Question:** "Should the name be a single word or a two-word codename?"
+**Header:** "Format"
+**multiSelect:** false
+**Options:**
+1. **Single word** - One word, the classic project name (e.g., 'artifex', 'nexus')
+2. **Two-word codename** - Operation style, two plain words (e.g., 'Operation Lead Balloon', 'Cobalt Squall')
+3. **Mix of both** - Roughly half single words and half codenames
+
+Skip this question when the request already says which ("give me an operation name", "a codename").
+
 ### 3. Generate Name Suggestions
 
 Based on the questionnaire responses and initial context, generate exactly **10 project name suggestions**.
+
+**Regarding Word Lists:**
+
+When a word list is selected, read its reference file before generating. Do not work from memory: the files hold the full lists, the origin of each word, and collision warnings.
+
+| Word list | Reference file |
+|---|---|
+| Periodic table elements | `references/periodic-elements.md` |
+| Meteorological terms | `references/meteorological-terms.md` |
+
+- One list selected: at least 5 of the 10 names come from it, or are built on a root from it.
+- Both lists selected: at least 3 names from each.
+- The user asked for a list by name ("name it after an element"): all 10 come from that list.
+- Pick words by meaning first. The word's origin or the behaviour of the thing it names has to connect to the project, and "Why it fits" states that connection.
+- Check each pick against the file's collision table. Mention any collision in the notes, and prefer the low-collision words when distinctiveness matters.
+- Word lists combine with the other answers. Length and tone still apply. With invented words allowed, list words can be blended or modified (e.g., "Osmia", "Virgo-", "Cirrova"), marked "(Invented, from ...)".
+- In the heading line, give the list in place of the language: "(Element 76: Greek *osme*, smell)" or "(Meteorology: Occitan, masterly wind)".
+
+**Regarding Two-Word Codenames:**
+
+When the format is "Two-word codename", all 10 names are codenames. With "Mix of both", 5 are.
+
+Construction:
+- Exactly two words: adjective + noun ("Lead Balloon") or noun + noun ("Cobalt Squall"). No articles, prepositions, or hyphens.
+- Each word is a real, plain word of 1 to 3 syllables that a listener can spell.
+- The pair has to say something together. Two unrelated words picked at random is the failure mode: either the phrase means something as a whole, or each word carries one facet of the project.
+- Prefer a stress pattern that is easy to say aloud. Read each one out as "Operation ___" before keeping it.
+- Do not reuse the name of a real military operation (Overlord, Desert Storm, Barbarossa, Rolling Thunder, Market Garden).
+
+Where to look first, in order:
+1. **Existing two-word terms of art** from the project's field or a selected word list ("Triple Point", "Synoptic Hour", "Occluded Front"). They already mean something as a pair.
+2. **Idioms and set phrases** ("Second Opinion", "Lead Balloon", "Anvil Chorus"). Same advantage, and no explanation needed.
+3. **Built pairs**, using the register table below. These are the weakest source: keep one only if the pair reads as a phrase and not as two words side by side.
+
+At least half of the codenames should come from sources 1 and 2.
+
+The Tone answer sets the register:
+
+| Tone | Register | How to build it | Examples |
+|---|---|---|---|
+| Professional | Solemn, in earnest | Virtue or quality + force or landmark. No irony | Steady Lantern, Iron Covenant, Quiet Bastion |
+| Balanced | Evocative, neutral | A term of art or mild idiom, or one word for what the project does + one concrete image. Sounds good, promises nothing | Synoptic Hour, Anvil Chorus, Crosswind Counsel, Cobalt Squall |
+| Creative | Deadpan, self-deprecating | An idiom for failure or mess, or a grand word beside a deflating one. The joke is that it is said with a straight face | Lead Balloon, Steaming Pile, Soggy Triumph, Majestic Shrug |
+| Technical | Dry, in-joke | A failure mode or jargon term + something incongruously pleasant or grand | Graceful Segfault, Null Sunrise, Orphan Parade |
+
+For the Creative register: aim the joke at the project or the work, never at people or groups. Keep it something the user could say in a meeting. Offer a range, from mild ("Modest Proposal") to blunt ("Steaming Pile"), and say which is which in the notes.
+
+How the other answers apply:
+- **Length** applies to the slug as a whole, hyphen included: Short is up to 12 characters (`lead-balloon`), Medium up to 18 (`crosswind-counsel`), Long anything over. It never overrides the 1 to 3 syllable rule, and a strong idiom or term of art beats the length preference: say so in the notes when a pick is outside the range.
+- **Word lists** supply one or both words: an element as the material, a weather term as the phenomenon ("Argon Haboob", "Bismuth Halo", "Tin Derecho"). The collision tables matter less here, since a pair is far more distinctive than either word alone.
+- **Languages** still apply, but favour plain English for at least one of the two words so the name stays sayable.
+- **Invented words** do not apply to codenames. Use real words only.
+- **Directness** decides whether a word names the project's function ("Silent Backup") or stays oblique ("Paper Anchor").
+
+Present each codename with:
+- The display form: **Operation Lead Balloon**
+- The slug for repos and commands: `lead-balloon`
+- Origin of the phrase or of each word, in place of the single etymology line
+- A short form if one is natural (initials or one of the two words)
 
 **Regarding Invented Words:**
 - If user selected "Yes, include invented words" - Generate 7-10 invented words using the techniques below
@@ -237,12 +325,14 @@ Before suggesting a name, consider:
 **Context:** CLI tool for managing environment variables across projects
 
 **Questionnaire Results:**
-- Theme: Tools & craft
+- Theme: Craft & creativity
 - Directness: Subtle reference
 - Tone: Technical
-- Languages: Latin, Old Norse
+- Languages: Classical, Germanic
 - Length: Short
 - Invented words: Mix of real and invented
+- Word lists: None
+- Format: Single word
 
 **Sample Suggestions:**
 - **envoy** (French via Latin: messenger) - Carries your environment settings
@@ -256,18 +346,62 @@ Before suggesting a name, consider:
 **Context:** Design system for building beautiful documentation
 
 **Questionnaire Results:**
-- Theme: Creativity & art
+- Theme: Craft & creativity
 - Directness: Abstract/Poetic
 - Tone: Creative
-- Languages: Greek, Latin, Modern English
+- Languages: Classical, Modern English
 - Length: Medium
 - Invented words: Only real words
+- Word lists: None
+- Format: Single word
 
 **Sample Suggestions:**
 - **chronicle** (Greek via Latin: time + writing) - Documents your project's story
 - **papyrus** (Greek/Latin: ancient writing material) - Foundation for beautiful docs
 - **eloquent** (Latin: speaking out) - Helps projects speak clearly
 - **canvas** (Latin via Old French: cloth for painting) - Blank surface for documentation art
+
+### Example 3: Word Lists
+
+**Context:** Background job scheduler that retries failed work
+
+**Questionnaire Results:**
+- Theme: Power & strength
+- Directness: Subtle reference
+- Tone: Balanced
+- Languages: Classical
+- Length: Flexible
+- Invented words: Only real words
+- Word lists: Periodic table elements, Meteorological terms
+- Format: Single word
+
+**Sample Suggestions:**
+- **rhenium** (Element 75: Latin *Rhenus*, the Rhine) - Among the highest melting and boiling points of any element; keeps working under heat
+- **tantalum** (Element 73: Tantalus of Greek myth) - Tantalus reached forever without giving up; the metal resists nearly all corrosion
+- **etesian** (Meteorology: Greek *etesios*, annual) - The wind that returns on schedule every summer
+- **squall** (Meteorology: sudden burst of wind) - Short bursts of work; note the destructive connotation
+- **okta** (Meteorology: one eighth of sky covered) - A unit of coverage; short and free of collisions
+
+### Example 4: Two-Word Codename
+
+**Context:** Migration of a legacy billing system that nobody wants to touch
+
+**Questionnaire Results:**
+- Theme: Power & strength
+- Directness: Subtle reference
+- Tone: Creative
+- Languages: Modern English
+- Length: Short
+- Invented words: Only real words
+- Word lists: Periodic table elements
+- Format: Two-word codename
+
+**Sample Suggestions:**
+- **Operation Lead Balloon** (`lead-balloon`) - Idiom, "went over like a lead balloon"; lead is element 82. Blunt: names the expected reception
+- **Operation Tin Parachute** (`tin-parachute`) - Tin, element 50, soft and cheap; a parachute that will not help much. Mild
+- **Operation Zinc Trophy** (`zinc-trophy`) - Zinc, element 30, the cheap coating on other metals; a prize nobody asked for. Mild
+- **Operation Noble Gas** (`noble-gas`) - The inert elements; grand title, does nothing. Deadpan
+- **Operation Heavy Water** (`heavy-water`) - Deuterium oxide; sounds serious, and the work is a slog
 
 ## Tips for Success
 
@@ -278,3 +412,4 @@ Before suggesting a name, consider:
 5. **Respect preferences** - If user has strong language preferences, honor them
 6. **Provide variety** - Include safe choices and bold choices in your 10
 7. **Etymology matters** - The story behind a name makes it more meaningful and memorable
+8. **Read the word list files** - When a word list is selected, load its reference file instead of recalling the list
