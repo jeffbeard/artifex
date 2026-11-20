@@ -47,6 +47,10 @@ Artifex is my collection of skills for Claude Code.
 
 **Location:** `skills/arxiv-search/`
 
+## Synoptix: multi-agent code review
+
+*Synoptix* is the working brand for the two cross-agent review skills below, which ship together as the `cross-agent` plugin. The name is from *synoptic*, Greek for "seeing all together": a synoptic chart puts many independent observations on one map. It is reserved as the project name if these skills are ever split into their own repository.
+
 ### agy-review
 **Description:** Get a read-only review from the Antigravity CLI (`agy`), with every finding verified before it is reported.
 
@@ -83,10 +87,10 @@ Artifex is a Claude Code plugin marketplace. Install all skills in one shot from
 /plugin install artifex@artifex
 ```
 
-The cross-agent review skills (`agy-review`, `consensus-review`) ship as a separate plugin, `synoptix-agent-review`. The name is from *synoptic*, Greek for "seeing all together": a synoptic chart puts many independent observations on one map.
+The cross-agent review skills (`agy-review`, `consensus-review`) ship as a separate plugin, `cross-agent`:
 
 ```
-/plugin install synoptix-agent-review@artifex
+/plugin install cross-agent@artifex
 ```
 
 To pull updates later:
