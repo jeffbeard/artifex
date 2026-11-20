@@ -1,6 +1,6 @@
 ---
 name: project-namer
-description: Generate creative, meaningful project names through a guided questionnaire. Draws from multiple language traditions (Latin, Greek, Norse, Gaelic, etc.) and optional themed word lists (periodic table elements, meteorological terms), and provides etymology for each suggestion. Perfect for naming software projects, products, repositories, or any creative endeavor.
+description: Generate creative, meaningful project names through a guided questionnaire. Draws from multiple language traditions (Latin, Greek, Norse, Gaelic, etc.) and optional themed word lists (periodic table elements, meteorological terms), can produce two-word operation-style codenames ("Operation Lead Balloon"), and provides etymology for each suggestion. Perfect for naming software projects, products, repositories, or any creative endeavor.
 ---
 
 # Project Namer
@@ -18,6 +18,7 @@ Use this skill when:
 - Need multiple options to choose from
 - Prefer names with linguistic depth (Latin, Greek, Norse, Gaelic, etc.)
 - Want names from a themed vocabulary, such as chemical elements or weather terms
+- Want a two-word codename in the style of a military operation
 
 ## Workflow
 
@@ -31,10 +32,10 @@ First, understand what the user is trying to name by asking open-ended questions
 
 ### 2. Run the Questionnaire
 
-Use the AskUserQuestion tool. It accepts at most 4 questions per call and 2 to 4 options per question, so the 7 questions go out in two calls:
+Use the AskUserQuestion tool. It accepts at most 4 questions per call and 2 to 4 options per question, so the 8 questions go out in two calls:
 
 - **Call 1:** Theme, Directness, Tone, Length
-- **Call 2:** Languages, Word Lists, Invented Words
+- **Call 2:** Languages, Word Lists, Invented Words, Name Format
 
 The tool adds an "Other" choice to every question on its own. Do not add one, and do not add options beyond the four listed. If the user's free-text answer names something outside the options (a different theme, another language), use it as given.
 
@@ -113,6 +114,17 @@ Skip this question when the user has already named a word list in their request,
 3. **Only real words** - Stick to actual words from the selected language traditions
 4. **Surprise me** - Use your judgment based on the project context
 
+#### Question 8: Name Format
+**Question:** "Should the name be a single word or a two-word codename?"
+**Header:** "Format"
+**multiSelect:** false
+**Options:**
+1. **Single word** - One word, the classic project name (e.g., 'artifex', 'nexus')
+2. **Two-word codename** - Operation style, two plain words (e.g., 'Operation Lead Balloon', 'Cobalt Squall')
+3. **Mix of both** - Roughly half single words and half codenames
+
+Skip this question when the request already says which ("give me an operation name", "a codename").
+
 ### 3. Generate Name Suggestions
 
 Based on the questionnaire responses and initial context, generate exactly **10 project name suggestions**.
@@ -133,6 +145,41 @@ When a word list is selected, read its reference file before generating. Do not 
 - Check each pick against the file's collision table. Mention any collision in the notes, and prefer the low-collision words when distinctiveness matters.
 - Word lists combine with the other answers. Length and tone still apply. With invented words allowed, list words can be blended or modified (e.g., "Osmia", "Virgo-", "Cirrova"), marked "(Invented, from ...)".
 - In the heading line, give the list in place of the language: "(Element 76: Greek *osme*, smell)" or "(Meteorology: Occitan, masterly wind)".
+
+**Regarding Two-Word Codenames:**
+
+When the format is "Two-word codename", all 10 names are codenames. With "Mix of both", 5 are.
+
+Construction:
+- Exactly two words: adjective + noun ("Lead Balloon") or noun + noun ("Cobalt Squall"). No articles, prepositions, or hyphens.
+- Each word is a real, plain word of 1 to 3 syllables that a listener can spell.
+- The pair has to say something together. Two unrelated words picked at random is the failure mode: either the phrase means something as a whole, or each word carries one facet of the project.
+- Prefer a stress pattern that is easy to say aloud. Read each one out as "Operation ___" before keeping it.
+- Do not reuse the name of a real military operation (Overlord, Desert Storm, Barbarossa, Rolling Thunder, Market Garden).
+
+The Tone answer sets the register:
+
+| Tone | Register | How to build it | Examples |
+|---|---|---|---|
+| Professional | Solemn, in earnest | Virtue or quality + force or landmark. No irony | Steady Lantern, Iron Covenant, Quiet Bastion |
+| Balanced | Evocative, neutral | Material or colour + phenomenon or object. Sounds good, promises nothing | Cobalt Squall, Amber Ridge, Osmium Front |
+| Creative | Deadpan, self-deprecating | An idiom for failure or mess, or a grand word beside a deflating one. The joke is that it is said with a straight face | Lead Balloon, Steaming Pile, Soggy Triumph, Majestic Shrug |
+| Technical | Dry, in-joke | A failure mode or jargon term + something incongruously pleasant or grand | Graceful Segfault, Null Sunrise, Orphan Parade |
+
+For the Creative register: aim the joke at the project or the work, never at people or groups. Keep it something the user could say in a meeting. Offer a range, from mild ("Modest Proposal") to blunt ("Steaming Pile"), and say which is which in the notes.
+
+How the other answers apply:
+- **Length** applies to each word, not the pair. "Short" means two short words.
+- **Word lists** supply one or both words: an element as the material, a weather term as the phenomenon ("Argon Haboob", "Bismuth Halo", "Tin Derecho"). The collision tables matter less here, since a pair is far more distinctive than either word alone.
+- **Languages** still apply, but favour plain English for at least one of the two words so the name stays sayable.
+- **Invented words** do not apply to codenames. Use real words only.
+- **Directness** decides whether a word names the project's function ("Silent Backup") or stays oblique ("Paper Anchor").
+
+Present each codename with:
+- The display form: **Operation Lead Balloon**
+- The slug for repos and commands: `lead-balloon`
+- Origin of the phrase or of each word, in place of the single etymology line
+- A short form if one is natural (initials or one of the two words)
 
 **Regarding Invented Words:**
 - If user selected "Yes, include invented words" - Generate 7-10 invented words using the techniques below
@@ -278,6 +325,7 @@ Before suggesting a name, consider:
 - Length: Short
 - Invented words: Mix of real and invented
 - Word lists: None
+- Format: Single word
 
 **Sample Suggestions:**
 - **envoy** (French via Latin: messenger) - Carries your environment settings
@@ -298,6 +346,7 @@ Before suggesting a name, consider:
 - Length: Medium
 - Invented words: Only real words
 - Word lists: None
+- Format: Single word
 
 **Sample Suggestions:**
 - **chronicle** (Greek via Latin: time + writing) - Documents your project's story
@@ -317,6 +366,7 @@ Before suggesting a name, consider:
 - Length: Flexible
 - Invented words: Only real words
 - Word lists: Periodic table elements, Meteorological terms
+- Format: Single word
 
 **Sample Suggestions:**
 - **rhenium** (Element 75: Latin *Rhenus*, the Rhine) - Among the highest melting and boiling points of any element; keeps working under heat
@@ -324,6 +374,27 @@ Before suggesting a name, consider:
 - **etesian** (Meteorology: Greek *etesios*, annual) - The wind that returns on schedule every summer
 - **squall** (Meteorology: sudden burst of wind) - Short bursts of work; note the destructive connotation
 - **okta** (Meteorology: one eighth of sky covered) - A unit of coverage; short and free of collisions
+
+### Example 4: Two-Word Codename
+
+**Context:** Migration of a legacy billing system that nobody wants to touch
+
+**Questionnaire Results:**
+- Theme: Power & strength
+- Directness: Subtle reference
+- Tone: Creative
+- Languages: Modern English
+- Length: Short
+- Invented words: Only real words
+- Word lists: Periodic table elements
+- Format: Two-word codename
+
+**Sample Suggestions:**
+- **Operation Lead Balloon** (`lead-balloon`) - Idiom, "went over like a lead balloon"; lead is element 82. Blunt: names the expected reception
+- **Operation Tin Parachute** (`tin-parachute`) - Tin, element 50, soft and cheap; a parachute that will not help much. Mild
+- **Operation Zinc Trophy** (`zinc-trophy`) - Zinc, element 30, the cheap coating on other metals; a prize nobody asked for. Mild
+- **Operation Noble Gas** (`noble-gas`) - The inert elements; grand title, does nothing. Deadpan
+- **Operation Heavy Water** (`heavy-water`) - Deuterium oxide; sounds serious, and the work is a slog
 
 ## Tips for Success
 
