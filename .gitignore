@@ -16,3 +16,6 @@ test-output/
 
 # Logs
 *.log
+
+# Cross-agent review artifacts (agy-review, consensus-review)
+.agent-reviews/
