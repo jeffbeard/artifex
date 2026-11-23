@@ -7,10 +7,11 @@
 #   output-file   Receives the reviewer's final message.
 #   session-id    Optional. Resume this Codex session (debate rounds).
 #
-# Side files written next to output-file:
-#   <output-file>.raw.jsonl  Full JSONL event stream from codex
-#   <output-file>.stderr     codex stderr
-#   <output-file>.session    Session (thread) id, for follow-ups
+# Side files go in a work/ directory beside output-file, named after it. When
+# output-file is itself inside a directory named work, they sit next to it.
+#   work/<output-name>.raw.jsonl  Full JSONL event stream from codex
+#   work/<output-name>.stderr     codex stderr
+#   work/<output-name>.session    Session (thread) id, for follow-ups
 #
 # Last stdout line is a status record:
 #   reviewer=codex status=<ok|unavailable|timeout|failed> session=<id> model=<name> output=<path> [reason=...]
@@ -62,9 +63,13 @@ if ! command -v codex >/dev/null 2>&1; then
   exit 127
 fi
 
-mkdir -p "$(dirname "$output_file")"
-raw="$output_file.raw.jsonl"
-err="$output_file.stderr"
+out_dir=$(dirname "$output_file")
+side_dir=$out_dir
+[ "$(basename "$out_dir")" = work ] || side_dir="$out_dir/work"
+mkdir -p "$side_dir"
+side="$side_dir/$(basename "$output_file")"
+raw="$side.raw.jsonl"
+err="$side.stderr"
 : > "$output_file"
 
 if [ -n "$session" ]; then
@@ -86,7 +91,7 @@ wait "$watchdog_pid" 2>/dev/null
 
 found=$(sed -n 's/.*"type":"thread.started","thread_id":"\([^"]*\)".*/\1/p' "$raw" | head -n 1)
 [ -n "$found" ] && session=$found
-[ -n "$session" ] && echo "$session" > "$output_file.session"
+[ -n "$session" ] && echo "$session" > "$side.session"
 
 if [ "$rc" -eq 143 ]; then
   status_line timeout "killed-after-${guard}s"

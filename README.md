@@ -60,7 +60,7 @@ Artifex is my collection of skills for Claude Code.
 - Reviews uncommitted changes, a branch diff, or an OpenSpec change
 - Runs agy headless in sandbox and plan mode, never with permission bypass
 - Marks each finding confirmed, unconfirmed, or wrong against the actual code
-- Saves prompts and raw responses under `.agent-reviews/<timestamp>/`
+- Saves the review and report under `.agent-reviews/<kind>-<label>-<timestamp>/`, in files named for what was reviewed, such as `openspec-review-agy-add-user-auth.md`. Prompts and raw responses go in its `work/` subdirectory
 
 **Requires:** `agy` installed and signed in.
 
@@ -74,6 +74,8 @@ Artifex is my collection of skills for Claude Code.
 - One debate round on disputed and unverified items, by resuming each reviewer's session
 - Decision table with justifications, unresolved items, and an ordered final changeset
 - Carries on when a reviewer is missing or times out, and says who was unavailable
+- Saves each reviewer's review and the combined decisions in files named for the change, such as `openspec-review-codex-add-user-auth.md` and `openspec-review-consensus-add-user-auth.md`
+- Asks once whether to gitignore all review artifacts or keep the reviews and ignore only the working files
 - Never edits files without confirmation
 
 **Requires:** `codex` and/or `agy` installed and signed in, plus the `agy-review` skill (same plugin).

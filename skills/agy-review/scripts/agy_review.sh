@@ -7,10 +7,11 @@
 #   output-file      Receives the reviewer's response text.
 #   conversation-id  Optional. Resume this agy conversation (debate rounds).
 #
-# Side files written next to output-file:
-#   <output-file>.raw.json   Full JSON from agy
-#   <output-file>.stderr     agy stderr
-#   <output-file>.session    Conversation id (for follow-ups)
+# Side files go in a work/ directory beside output-file, named after it. When
+# output-file is itself inside a directory named work, they sit next to it.
+#   work/<output-name>.raw.json   Full JSON from agy
+#   work/<output-name>.stderr     agy stderr
+#   work/<output-name>.session    Conversation id (for follow-ups)
 #
 # Last stdout line is a status record:
 #   reviewer=agy status=<ok|unavailable|timeout|failed> session=<id> model=<name> output=<path> [reason=...]
@@ -78,9 +79,13 @@ if ! command -v agy >/dev/null 2>&1; then
   exit 127
 fi
 
-mkdir -p "$(dirname "$output_file")"
-raw="$output_file.raw.json"
-err="$output_file.stderr"
+out_dir=$(dirname "$output_file")
+side_dir=$out_dir
+[ "$(basename "$out_dir")" = work ] || side_dir="$out_dir/work"
+mkdir -p "$side_dir"
+side="$side_dir/$(basename "$output_file")"
+raw="$side.raw.json"
+err="$side.stderr"
 : > "$output_file"
 
 args=(--print "$(cat "$prompt_file")" --output-format json --sandbox --mode plan --print-timeout "$print_timeout")
@@ -115,7 +120,7 @@ fi
 
 found=$(json_field "$raw" conversation_id)
 [ -n "$found" ] && session=$found
-[ -n "$session" ] && echo "$session" > "$output_file.session"
+[ -n "$session" ] && echo "$session" > "$side.session"
 
 agy_status=$(json_field "$raw" status)
 json_field "$raw" response > "$output_file"

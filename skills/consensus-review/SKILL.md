@@ -13,15 +13,17 @@ Agreement between reviewers is not proof. Each decision rests on what the code o
 
 Produces decisions, not edits. Apply the final changeset only after the user confirms.
 
-**Required reading before the first step:** `../agy-review/references/review-protocol.md` relative to this skill's directory (personal install: `~/.claude/skills/agy-review/references/review-protocol.md`). It holds the rules, target resolution, artifact layout, reviewer prompt, and verification marks. If the `agy-review` skill is not installed, say so and stop.
+**Required reading before the first step:** `../agy-review/references/review-protocol.md` relative to this skill's directory (personal install: `~/.claude/skills/agy-review/references/review-protocol.md`). It holds the rules, target resolution, run naming, artifact layout, reviewer prompt, and verification marks. If the `agy-review` skill is not installed, say so and stop.
 
 ## Reviewers
 
-| Reviewer | Script | Resume id file |
+| Reviewer | Script | Review file |
 |---|---|---|
-| codex | `<skill-dir>/scripts/codex_review.sh` | `codex.md.session` |
-| agy | `<skill-dir>/../agy-review/scripts/agy_review.sh` | `agy.md.session` |
-| claude | You, in this session | n/a |
+| codex | `<skill-dir>/scripts/codex_review.sh` | `<kind>-review-codex-<label>.md` |
+| agy | `<skill-dir>/../agy-review/scripts/agy_review.sh` | `<kind>-review-agy-<label>.md` |
+| claude | You, in this session | `<kind>-review-claude-<label>.md` |
+
+`<kind>` and `<label>` come from the protocol's "Name the run". For the OpenSpec change `add-user-auth`, codex's review file is `openspec-review-codex-add-user-auth.md`. Review files sit at the top of the run directory. Each script puts its side files under `work/`, named after the review file: the resume id is in `work/<review-file>.session`.
 
 Both scripts share one contract: `<script> <prompt-file> <output-file> [session-id]`. The last stdout line is `reviewer=<name> status=<ok|unavailable|timeout|failed> session=<id> model=<name> output=<path> [reason=...]`. Exit codes: 0 ok, 127 not installed, 124 timeout, 1 failed.
 
@@ -29,15 +31,15 @@ If the user names a subset ("just codex"), run that subset. Claude always review
 
 ## Phase 1: independent review
 
-1. Resolve the target and create the run directory with the protocol's Artifacts snippet (it saves the `git status --short` baseline and checks gitignore). Write `target.md` and `prompt.md` from the protocol's templates. On the first review of the conversation, run the protocol's global rules check.
+1. Resolve the target, name the run, and create the run directory with the protocol's Artifacts snippets (they check gitignore and save the `git status --short` baseline). If `.agent-reviews` is not gitignored, follow the protocol's Gitignore section before going on. Write `work/target.md` and `work/prompt.md` from the protocol's templates. On the first review of the conversation, run the protocol's global rules check.
 2. Start both reviewers from the repo root as background commands, in one message so they run in parallel. Neither sees the other's output.
 
    ```bash
-   <skill-dir>/scripts/codex_review.sh "$run_dir/prompt.md" "$run_dir/codex.md"
-   <skill-dir>/../agy-review/scripts/agy_review.sh "$run_dir/prompt.md" "$run_dir/agy.md"
+   <skill-dir>/scripts/codex_review.sh "$run_dir/work/prompt.md" "$run_dir/<kind>-review-codex-<label>.md"
+   <skill-dir>/../agy-review/scripts/agy_review.sh "$run_dir/work/prompt.md" "$run_dir/<kind>-review-agy-<label>.md"
    ```
 
-3. **While they run, write your own review to `$run_dir/claude.md`** in the same finding format. Finish it before opening `codex.md` or `agy.md`. A review written after reading theirs is not independent.
+3. **While they run, write your own review to `$run_dir/<kind>-review-claude-<label>.md`** in the same finding format. Finish it before opening the codex or agy review file. A review written after reading theirs is not independent. Never name it `claude.md`: see the protocol's reserved file names.
 4. Wait for both background commands to finish (their completion notifications), then read each status record.
    - Any status other than `ok` makes that reviewer unavailable.
    - `ok` is not enough: apply the protocol's "Check each response is a review". A response with no `ID:` block and no `NO FINDINGS` line is not a review, and after one failed retry that reviewer is unavailable too.
@@ -68,10 +70,11 @@ Edge cases:
 
 Debate only disputed items, unconfirmed single-source items, and the `NO FINDINGS` questions from phase 2. Skip the phase when there are none.
 
-For each reviewer with something to answer, write `debate-1-<reviewer>.prompt.md` and resume that reviewer's own session:
+For each reviewer with something to answer, write `work/debate-1-<reviewer>.prompt.md` and resume that reviewer's own session:
 
 ```bash
-<script> "$run_dir/debate-1-codex.prompt.md" "$run_dir/debate-1-codex.md" "$(cat "$run_dir/codex.md.session")"
+<script> "$run_dir/work/debate-1-codex.prompt.md" "$run_dir/work/debate-1-codex.md" \
+  "$(cat "$run_dir/work/<kind>-review-codex-<label>.md.session")"
 ```
 
 Debate prompt:
@@ -129,7 +132,7 @@ When reviewers still disagree after the debate, you decide, and the justificatio
 
 Confirm `git status --short` matches the baseline as the protocol describes. If it changed, report exactly what changed first.
 
-Save to `$run_dir/report.md` and show the user:
+Save to `$run_dir/<kind>-review-consensus-<label>.md` and show the user:
 
 ```
 ## Review of <target>
@@ -159,10 +162,11 @@ Then ask whether to apply the final changeset. Do not apply it unasked.
 
 | Mistake | Fix |
 |---|---|
-| Reading reviewer output before writing your own review | Write `claude.md` first |
+| Reading reviewer output before writing your own review | Write your own review file first |
+| Naming your review `claude.md` | Use `<kind>-review-claude-<label>.md`. `claude.md` loads as `CLAUDE.md` on a case-insensitive filesystem |
 | Running reviewers one after another | Background both in one message |
 | Debating agreed items | Only disputed and unconfirmed single-source items, plus the `NO FINDINGS` question above |
-| Overwriting a failed attempt on retry | Rename `<reviewer>.md*` to `<reviewer>-attempt1.md*` first |
+| Overwriting a failed attempt on retry | First rename the review file to end in `-attempt1.md`, and its `work/` side files to match |
 | Giving one reviewer a different prompt | Fix `prompt.md` and rerun every reviewer with the same text |
 | Accepting on majority vote | Verification decides. Votes are context |
 | Hiding an unavailable reviewer | Name it and the reason on the Reviewers line |
@@ -183,4 +187,4 @@ Verified against codex-cli 0.171.0 and agy 1.5.13.
 
 ## Adding a reviewer
 
-Write `scripts/<name>_review.sh` with the same three-argument contract, status record, and exit codes, running the CLI in its read-only mode. Add a row to the Reviewers table. The phases need no other change.
+Write `scripts/<name>_review.sh` with the same three-argument contract, status record, exit codes, and `work/` side-file placement, running the CLI in its read-only mode. Add a row to the Reviewers table. The phases need no other change.
