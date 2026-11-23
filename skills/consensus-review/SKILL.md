@@ -25,7 +25,7 @@ Produces decisions, not edits. Apply the final changeset only after the user con
 
 `<kind>` and `<label>` come from the protocol's "Name the run". For the OpenSpec change `add-user-auth`, codex's review file is `openspec-review-codex-add-user-auth.md`. Review files sit at the top of the run directory. Each script puts its side files under `work/`, named after the review file: the resume id is in `work/<review-file>.session`.
 
-Both scripts share one contract: `<script> <prompt-file> <output-file> [session-id]`. The last stdout line is `reviewer=<name> status=<ok|unavailable|timeout|failed> session=<id> model=<name> output=<path> [reason=...]`. Exit codes: 0 ok, 127 not installed, 124 timeout, 1 failed.
+Both scripts share one contract: `<script> <prompt-file> <output-file> [session-id]`. The last stdout line is a status record: `reviewer=<name> status=<ok|unavailable|timeout|failed> session=<id> model=<name> output=<path>`, then optional `duration=`, `tokens=`, `partial=yes`, and `reason=` fields. The protocol's "Status records" explains them. Exit codes: 0 ok, 127 not installed, 124 timeout, 1 failed.
 
 If the user names a subset ("just codex"), run that subset. Claude always reviews.
 
@@ -40,8 +40,11 @@ If the user names a subset ("just codex"), run that subset. Claude always review
    ```
 
 3. **While they run, write your own review to `$run_dir/<kind>-review-claude-<label>.md`** in the same finding format. Finish it before opening the codex or agy review file. A review written after reading theirs is not independent. Never name it `claude.md`: see the protocol's reserved file names.
-4. Wait for both background commands to finish (their completion notifications), then read each status record.
-   - Any status other than `ok` makes that reviewer unavailable.
+4. Wait for both background commands to finish (their completion notifications), then read each status record. agy often takes several times longer than codex. That is not a fault: to see what a slow reviewer is doing, read the last lines of its `.raw.jsonl` file under `work/`, and do not kill it while events are arriving.
+   - Any status other than `ok` makes that reviewer unavailable. Report its `reason`, `duration`, and `tokens`.
+   - For `status=timeout`, follow the protocol's Timeouts table: one retry at most, with the limit doubled. Carry on with the other reviewers meanwhile.
+   - With `recovered=yes` the status is `ok`: agy ran out of time and its review came from a short recovery turn. Use it, mark it time-limited on the Reviewers line, and follow the protocol's "Recovered reviews".
+   - With `partial=yes`, the reviewer is still unavailable, but its review file holds unfinished text. Complete finding blocks in it enter phase 2 as single-source leads, marked partial in the report.
    - `ok` is not enough: apply the protocol's "Check each response is a review". A response with no `ID:` block and no `NO FINDINGS` line is not a review, and after one failed retry that reviewer is unavailable too.
    - Note who and why, then continue with the rest.
 5. When a reviewer the user named is unavailable, put one line above the report saying who is missing and that the result is from the remaining reviewers. The `Unavailable:` field alone is not enough.
@@ -73,9 +76,12 @@ Debate only disputed items, unconfirmed single-source items, and the `NO FINDING
 For each reviewer with something to answer, write `work/debate-1-<reviewer>.prompt.md` and resume that reviewer's own session:
 
 ```bash
-<script> "$run_dir/work/debate-1-codex.prompt.md" "$run_dir/work/debate-1-codex.md" \
+AGY_REVIEW_EFFORT="${AGY_REVIEW_EFFORT:-medium}" \
+  <script> "$run_dir/work/debate-1-codex.prompt.md" "$run_dir/work/debate-1-codex.md" \
   "$(cat "$run_dir/work/<kind>-review-codex-<label>.md.session")"
 ```
+
+The `AGY_REVIEW_EFFORT` prefix only affects agy and is harmless for codex. It runs agy's debate turn at `medium` effort unless the user set a level: the resumed conversation already holds the material, so answering does not need another long thinking pass.
 
 Debate prompt:
 
@@ -170,6 +176,7 @@ Then ask whether to apply the final changeset. Do not apply it unasked.
 | Giving one reviewer a different prompt | Fix `prompt.md` and rerun every reviewer with the same text |
 | Accepting on majority vote | Verification decides. Votes are context |
 | Hiding an unavailable reviewer | Name it and the reason on the Reviewers line |
+| Killing agy because codex has finished | Check its `.raw.jsonl` file. If events are arriving, wait for the timeout |
 | Using `codex review` | It rejects a custom prompt with `--uncommitted` or `--base`, so the finding format and resumable session are lost. Use the script |
 | Resuming with `--last` or `--continue` | Always resume by the id in the `.session` file |
 | Bypass flags to get past a denial | Never. Fix the prompt |
@@ -181,10 +188,11 @@ Then ask whether to apply the final changeset. Do not apply it unasked.
 |---|---|---|
 | `CODEX_REVIEW_TIMEOUT` | `600` | Seconds before the codex run is killed |
 | `CODEX_REVIEW_MODEL` | codex's configured model | Passed as `-m` |
-| `AGY_REVIEW_TIMEOUT`, `AGY_REVIEW_MODEL` | see `agy-review` | |
+| `AGY_REVIEW_TIMEOUT`, `AGY_REVIEW_MODEL`, `AGY_REVIEW_EFFORT` | see `agy-review` | |
+| `REVIEW_DEBUG` | unset | Set to `1` to keep each reviewer's exact command line (and agy's log) under `work/` |
 
-Verified against codex-cli 0.171.0 and agy 1.5.13.
+Verified against codex-cli 0.171.0 and agy 1.5.15.
 
 ## Adding a reviewer
 
-Write `scripts/<name>_review.sh` with the same three-argument contract, status record, exit codes, and `work/` side-file placement, running the CLI in its read-only mode. Add a row to the Reviewers table. The phases need no other change.
+Write `scripts/<name>_review.sh` with the same three-argument contract, status record, exit codes, `work/` side-file placement, and an event stream written while the CLI runs, running the CLI in its read-only mode. Add a row to the Reviewers table. The phases need no other change.

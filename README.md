@@ -59,6 +59,9 @@ Artifex is my collection of skills for Claude Code.
 **Features:**
 - Reviews uncommitted changes, a branch diff, or an OpenSpec change
 - Runs agy headless in sandbox and plan mode, never with permission bypass
+- Gives reviewers the change and a repository file index in one file, so agy, which cannot list directories when headless, does not guess paths
+- Streams agy's events to a file and prints progress lines while it runs. If agy runs out of time, the script resumes the conversation once to collect the findings it had
+- Reports why a run failed, how long it ran, and the tokens used. `REVIEW_DEBUG=1` keeps the exact command line for reproducing a run by hand
 - Marks each finding confirmed, unconfirmed, or wrong against the actual code
 - Saves the review and report under `.agent-reviews/<kind>-<label>-<timestamp>/`, in files named for what was reviewed, such as `openspec-review-agy-add-user-auth.md`. Prompts and raw responses go in its `work/` subdirectory
 

@@ -1,6 +1,6 @@
 # Cross-agent review protocol
 
-Shared by `agy-review` and `consensus-review`. Covers rules, target resolution, run naming, artifacts, the reviewer prompt, and verification.
+Shared by `agy-review` and `consensus-review`. Covers rules, target resolution, run naming, artifacts, the reviewer prompt, status records, and verification.
 
 ## Rules
 
@@ -17,7 +17,7 @@ Pick one from the request and state which was chosen at the top of the report.
 
 | Target | When | Material |
 |---|---|---|
-| Code, uncommitted | "review my changes", default for code | `git diff` plus `git diff --staged`; list untracked files from `git status --short` and include their contents |
+| Code, uncommitted | "review my changes", default for code | `git diff` plus `git diff --staged`; list untracked files from `git status --short` and include their contents, leaving out anything under `.agent-reviews/` |
 | Code, pre-PR | "before we open a PR", "review the branch" | `git diff $(git merge-base HEAD <default-branch>)...HEAD`; default branch from `git symbolic-ref --short refs/remotes/origin/HEAD`, else `main` |
 | OpenSpec change | "OpenSpec change", "the proposal", "the spec" | `openspec/changes/<change-id>/` (proposal, tasks, design, spec deltas) |
 
@@ -81,7 +81,8 @@ At the end of the run, compare `git status --short | grep -v '^?? \.agent-review
 | `work/git-status-before.txt` | Baseline for the no-changes check |
 | `work/target.md` | Target type, how it was resolved, and the material. See the template below |
 | `work/prompt.md` | Reviewer prompt, identical for every reviewer |
-| `work/<review-file>.raw.json[l]`, `.stderr`, `.session` | Written by the scripts for each reviewer response, named after the response file |
+| `work/<review-file>.raw.jsonl`, `.stderr`, `.session` | Written by the scripts for each reviewer response, named after the response file. The `.raw.jsonl` event stream grows while the reviewer runs |
+| `work/<review-file>.cmd`, `.agy.log` | Only with `REVIEW_DEBUG=1`. See Status records |
 | `work/debate-<n>-<reviewer>.prompt.md`, `work/debate-<n>-<reviewer>.md` | Debate rounds (`consensus-review` only) |
 | `work/followup-<n>.prompt.md`, `work/followup-<n>.md` | Follow-up questions (`agy-review` only) |
 
@@ -109,7 +110,7 @@ The check above passes when `.agent-reviews/` is ignored entirely, or when only 
 | Ignore everything | `.agent-reviews/` | Nothing from a review is committed |
 | Keep reviews | `.agent-reviews/*/work/` | Reviews and final reports can be committed. Prompts, raw logs, and session ids stay out |
 
-Make no other change to `.gitignore`. If the user cannot be asked or declines both, leave it alone and say at the top of the report that `.agent-reviews` is not gitignored.
+Make no other change to `.gitignore`. That line is not part of the change under review: when the target is uncommitted code, leave its hunk out of the diff in `work/target.md` and say so under `Resolved by`. If the user cannot be asked or declines both, leave it alone and say at the top of the report that `.agent-reviews` is not gitignored.
 
 `work/target.md` template:
 
@@ -130,9 +131,21 @@ Branch: <branch>   Base: <merge base sha, pre-PR only>
 
 ## OpenSpec validate output
 <output, OpenSpec targets only>
+
+## Repository file index
+Tracked files in this repository. Take exact paths from this list when reading
+surrounding code, tests, or specs.
+```
+<file list, see below>
+```
 ````
 
-For an OpenSpec change, `Material` lists the files in the change folder instead of a diff. Reviewers read those in place.
+For an OpenSpec change, `Material` holds the full contents of every file in the change folder (proposal, design, tasks, and each spec delta), each under a `### <path>` heading, instead of a diff. A reviewer then has the whole change after reading one file.
+
+The repository file index is there because a reviewer may have no way to list a directory: headless agy can read a file by path and nothing else, and without the index it guesses file names one failed read at a time until it runs out of time. Fill it like this:
+
+- `git ls-files | wc -l` is 500 or fewer: the whole `git ls-files` output.
+- More than 500: `git ls-files` for each directory the target touches or names (for an OpenSpec change that includes `openspec/specs/` and the code and test directories the proposal mentions), then the output of `git ls-files | cut -d/ -f1-2 | sort -u` so the rest of the layout is visible. Say under the heading that the list is not complete.
 
 ## Reviewer prompt
 
@@ -149,8 +162,10 @@ Do not modify, create, or delete files. This is a read-only review.
 Reading files: if you have dedicated file-reading and search tools, use them and do
 not run shell commands, because a denied command ends the review with no output. If
 shell is your only way to read files, use read-only commands such as cat, sed, rg,
-and ls, and nothing else. If you still cannot read the material, say so instead of
-guessing.
+and ls, and nothing else. Take file paths from the "Repository file index" at the end
+of the target file and do not guess file names. When you need several files, read them together
+in one batch rather than one at a time. If you still cannot read the material, say
+so instead of guessing.
 Follow AGENTS.md and your global rules. When a finding comes from a rule, name the rule.
 
 Look for: correctness bugs, unhandled edge cases, security problems, contradictions
@@ -173,16 +188,49 @@ If you find nothing, reply with the single line: NO FINDINGS
 
 The prompt must be byte-identical across reviewers so no reviewer is primed differently. Reviewers pick their own ID prefix (agy tends to write `antigravity-1`); normalise prefixes to `agy-<n>` and `codex-<n>` when parsing.
 
-Two parts of the prompt are load-bearing, so keep them when adapting it:
+Three things here are load-bearing, so keep them when adapting the prompt or the target file:
 
-- **The "Reading files" paragraph.** It has to serve two opposite CLIs. Headless agy has file tools, auto-denies any shell command, and then returns an empty response (the script reports `status=failed reason=tool-permission-denied-see-stderr`). Codex has no file tools and reads through sandboxed shell, so a flat "no shell commands" makes it refuse the review. The fix for either failure is this wording, never a permission-bypass flag.
-- **The material lives in `work/target.md`.** Reviewers cannot be relied on to run `git diff` themselves, so the diff has to be on disk where file-reading tools reach it.
+- **The "Reading files" paragraph.** It has to serve two opposite CLIs. Headless agy has one file tool, `read_file`, with no way to list or search. It auto-denies any shell command, and then returns an empty response (the script reports `status=failed reason=tool-permission-denied-see-stderr`). Codex has no file tools and reads through sandboxed shell, so a flat "no shell commands" makes it refuse the review. The fix for either failure is this wording, never a permission-bypass flag.
+- **The material lives in `work/target.md`.** Reviewers cannot be relied on to run `git diff` themselves, so the diff or the change files have to be on disk where file-reading tools reach them.
+- **The repository file index.** It is the only way headless agy learns what files exist. Do not add a limit on how many files a reviewer may read: the prompt is shared, and reading widely is how reviewers find problems outside the diff.
+
+## Status records
+
+Each script ends with one status line on stdout:
+
+```
+reviewer=<name> status=<ok|unavailable|timeout|failed> session=<id> model=<name> output=<path> [duration=<n>s] [tokens=<n>] [partial=yes] [reason=...]
+```
+
+| Field | Meaning |
+|---|---|
+| `duration` | Wall-clock seconds the CLI ran |
+| `tokens` | Total tokens the CLI reported, when it reported any |
+| `partial=yes` | agy only. The run did not finish, and the review file holds the text written so far |
+| `recovered=yes` | agy only. agy hit its time limit before writing any finding, and the script resumed the conversation for one short turn with no tools to collect what it had found. The status is `ok` and the review file holds a real review, but from exploration that was cut short |
+| `reason` | Why the run did not succeed. For agy this is its own `finished_reason` when it gave one, such as `print_timeout` |
+
+**Progress.** While a reviewer runs, its script prints a line to stdout every ten seconds in which something happened, such as `[agy 40s] 31 events, last: tool read_file`, so a background command shows activity. The events themselves are appended to `work/<review-file>.raw.jsonl`. To see what a slow reviewer is doing, read the last few lines of that file. Events still arriving mean it is working: leave it alone until its timeout. agy is often several times slower than codex on the same target, and that alone is not a fault.
+
+**Timeouts.** Tell the two kinds apart by `reason`:
+
+| Reason | What happened | Action |
+|---|---|---|
+| `print_timeout` with `status=timeout` | agy was still working when its time limit ran out, and the recovery turn did not produce a review either. `duration` and `tokens` show how far it got | Offer one retry with the limit doubled, for example `AGY_REVIEW_TIMEOUT=40m`. Never a second retry |
+| `print_timeout` with `status=ok recovered=yes` | Same, but the recovery turn produced a review | Use the review. Say in the report that it is time-limited, and offer the same retry if the user wants a full one |
+| `killed-after-<n>s` | The script's watchdog killed the CLI. For agy that means it ignored its own limit. For codex the watchdog is the only limit | Read the end of the `.raw.jsonl` file. If events were still arriving, offer one retry with the limit doubled. If they had stopped, report a hang and do not retry |
+
+**Partial output.** With `partial=yes` the review file is an unfinished response. Complete finding blocks in it are leads to verify like any other. Drop a block that is cut off. Say in the report that the review is partial, and never read the absence of a finding in it as a pass.
+
+**Recovered reviews.** With `recovered=yes`, verify the findings like any other. agy stopped exploring early, so the absence of a finding, and a `NO FINDINGS` answer in particular, is not a pass: say so in the report.
+
+**Debugging a failed run.** Rerun with `REVIEW_DEBUG=1` in the environment. Each script then writes `work/<review-file>.cmd`, the exact command line, which can be pasted into a shell to reproduce the run by hand. agy also writes its own log to `work/<review-file>.agy.log`. Without the switch, agy still keeps a full transcript of every conversation, including its tool calls, at `~/.gemini/antigravity-cli/brain/<session>/.system_generated/logs/transcript.jsonl`, where `<session>` is the id in the status line.
 
 ## Check each response is a review
 
 `status=ok` only means the CLI returned text. Before parsing, confirm the response contains at least one `ID:` block or the line `NO FINDINGS`. If it has neither (a refusal, "I cannot read the file", a question, a plan):
 
-1. Read the response and its `.raw.json[l]` file under `work/` to find the cause.
+1. Read the response and its `.raw.jsonl` file under `work/` to find the cause.
 2. Retry once with the same prompt if the cause looks transient.
 3. Otherwise treat the reviewer as unavailable and quote its response in the report.
 
