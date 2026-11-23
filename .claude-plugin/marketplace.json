@@ -23,11 +23,10 @@
     {
       "name": "cross-agent",
       "source": "./",
-      "description": "Cross-agent review skills: agy-review (read-only review from the Antigravity CLI) and consensus-review (Codex, agy, and Claude review independently, debate disagreements, and report decisions)",
-      "version": "0.1.0",
+      "description": "Cross-agent review: the consensus-review skill has Codex, the Antigravity CLI (agy), and Claude review the same change independently, debate disagreements, and report a decision for every proposed change. Also runs a review from one outside agent alone",
+      "version": "0.2.0",
       "strict": false,
       "skills": [
-        "./skills/agy-review",
         "./skills/consensus-review"
       ]
     }

@@ -1,6 +1,6 @@
 # Cross-agent review protocol
 
-Shared by `agy-review` and `consensus-review`. Covers rules, target resolution, run naming, artifacts, the reviewer prompt, status records, and verification.
+Read by the `consensus-review` skill before every review. Covers rules, target resolution, run naming, artifacts, the reviewer prompt, status records, and verification.
 
 ## Rules
 
@@ -76,19 +76,18 @@ At the end of the run, compare `git status --short | grep -v '^?? \.agent-review
 | File | Content |
 |---|---|
 | `<kind>-review-<reviewer>-<label>.md` | One reviewer's response: `codex`, `agy`, or `claude` |
-| `<kind>-review-consensus-<label>.md` | Final report from `consensus-review`, including a single-reviewer result |
-| `<kind>-review-report-<label>.md` | Final report from `agy-review` |
+| `<kind>-review-consensus-<label>.md` | Final report, whatever the number of reviewers |
 | `work/git-status-before.txt` | Baseline for the no-changes check |
 | `work/target.md` | Target type, how it was resolved, and the material. See the template below |
 | `work/prompt.md` | Reviewer prompt, identical for every reviewer |
 | `work/<review-file>.raw.jsonl`, `.stderr`, `.session` | Written by the scripts for each reviewer response, named after the response file. The `.raw.jsonl` event stream grows while the reviewer runs |
 | `work/<review-file>.cmd`, `.agy.log` | Only with `REVIEW_DEBUG=1`. See Status records |
-| `work/debate-<n>-<reviewer>.prompt.md`, `work/debate-<n>-<reviewer>.md` | Debate rounds (`consensus-review` only) |
-| `work/followup-<n>.prompt.md`, `work/followup-<n>.md` | Follow-up questions (`agy-review` only) |
+| `work/debate-<n>-<reviewer>.prompt.md`, `work/debate-<n>-<reviewer>.md` | Debate rounds |
+| `work/followup-<n>.prompt.md`, `work/followup-<n>-<reviewer>.md` | Follow-up questions after the report |
 
 If the final report cannot be written, show it anyway and say it was not saved.
 
-Example, `consensus-review` of the OpenSpec change `add-user-auth`:
+Example, a review of the OpenSpec change `add-user-auth` by all three reviewers:
 
 ```
 .agent-reviews/openspec-add-user-auth-20261123-141502/
