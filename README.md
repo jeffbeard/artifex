@@ -51,37 +51,37 @@ Artifex is my collection of skills for Claude Code.
 
 ## Synoptix: multi-agent code review
 
-*Synoptix* is the working brand for the two cross-agent review skills below, which ship together as the `cross-agent` plugin. The name is from *synoptic*, Greek for "seeing all together": a synoptic chart puts many independent observations on one map. It is reserved as the project name if these skills are ever split into their own repository.
+*Synoptix* is the working brand for the cross-agent review skill below, which ships as the `cross-agent` plugin. The name is from *synoptic*, Greek for "seeing all together": a synoptic chart puts many independent observations on one map. It is reserved as the project name if this skill is ever split into its own repository.
 
-### agy-review
-**Description:** Get a read-only review from the Antigravity CLI (`agy`), with every finding verified before it is reported.
+### consensus-review
+**Description:** Codex, agy (the Antigravity CLI), and Claude review the same target independently, debate the disagreements, and report a decision for every proposed change. Also runs a review from one outside agent alone.
 
 **Features:**
 - Reviews uncommitted changes, a branch diff, or an OpenSpec change
-- Runs agy headless in sandbox and plan mode, never with permission bypass
-- Gives reviewers the change and a repository file index in one file, so agy, which cannot list directories when headless, does not guess paths
-- Streams agy's events to a file and prints progress lines while it runs. If agy runs out of time, the script resumes the conversation once to collect the findings it had
-- Reports why a run failed, how long it ran, and the tokens used. `REVIEW_DEBUG=1` keeps the exact command line for reproducing a run by hand
-- Marks each finding confirmed, unconfirmed, or wrong against the actual code
-- Saves the review and report under `.agent-reviews/<kind>-<label>-<timestamp>/`, in files named for what was reviewed, such as `openspec-review-agy-add-user-auth.md`. Prompts and raw responses go in its `work/` subdirectory
-
-**Requires:** `agy` installed and signed in.
-
-**Location:** `skills/agy-review/`
-
-### consensus-review
-**Description:** Codex, agy, and Claude review the same target independently, debate the disagreements, and report a decision for every proposed change.
-
-**Features:**
-- Parallel, isolated reviews in a shared finding format
+- Parallel, isolated reviews in a shared finding format, with every finding verified against the code or spec before it counts
 - One debate round on disputed and unverified items, by resuming each reviewer's session
 - Decision table with justifications, unresolved items, and an ordered final changeset
-- Carries on when a reviewer is missing or times out, and says who was unavailable
-- Saves each reviewer's review and the combined decisions in files named for the change, such as `openspec-review-codex-add-user-auth.md` and `openspec-review-consensus-add-user-auth.md`
+- Reviewers run read-only: Codex in a read-only sandbox, agy in sandbox and plan mode, never with permission bypass
+- Checks for `codex`, `agy`, and `jq` or `python3` before starting, says what is missing, and carries on with the reviewers that are available
+- Gives reviewers the change and a repository file index in one file, so agy, which cannot list directories when headless, does not guess paths
+- Prints progress lines while reviewers run. If agy runs out of time, resumes its conversation once to collect the findings it had
+- Reports why a run failed, how long it ran, and the tokens used. `REVIEW_DEBUG=1` keeps the exact command line for reproducing a run by hand
+- Saves each reviewer's review and the combined decisions under `.agent-reviews/<kind>-<label>-<timestamp>/`, in files named for the change, such as `openspec-review-codex-add-user-auth.md` and `openspec-review-consensus-add-user-auth.md`. Prompts and raw responses go in its `work/` subdirectory
 - Asks once whether to gitignore all review artifacts or keep the reviews and ignore only the working files
 - Never edits files without confirmation
 
-**Requires:** `codex` and/or `agy` installed and signed in, plus the `agy-review` skill (same plugin).
+**Dependencies:**
+
+| Tool | Needed | Used for |
+|---|---|---|
+| `git` | Yes | Diffs, the file index, and the check that a review changed nothing |
+| `codex` (OpenAI Codex CLI), installed and signed in | For Codex reviews | The Codex reviewer. Verified with codex-cli 0.171.0 |
+| `agy` (Antigravity CLI), installed and signed in | For agy reviews | The agy reviewer. Verified with agy 1.5.15 |
+| `jq` or `python3` | For agy reviews | Reading agy's output |
+| `openspec` | Optional | Validating an OpenSpec change before it is reviewed |
+| `gh` (GitHub CLI) | Optional | Adding the pull request number to a code review's file names |
+
+At least one of `codex` and `agy` is needed for an outside review. The skill checks for all of these before it starts and says what is missing.
 
 **Location:** `skills/consensus-review/`
 
@@ -94,7 +94,7 @@ Artifex is a Claude Code plugin marketplace. Install all skills in one shot from
 /plugin install artifex@artifex
 ```
 
-The cross-agent review skills (`agy-review`, `consensus-review`) ship as a separate plugin, `cross-agent`:
+The cross-agent review skill (`consensus-review`) ships as a separate plugin, `cross-agent`:
 
 ```
 /plugin install cross-agent@artifex
@@ -123,7 +123,7 @@ cp -r skills/skill-finder ./.claude/skills/
 Once installed, Claude Code automatically discovers and uses skills based on your requests. For example:
 
 - "Find skills about file organization" → Triggers **skill-finder**
-- "Ask agy to review the current OpenSpec change" → Triggers **agy-review**
+- "Ask agy to review the current OpenSpec change" → Triggers **consensus-review**
 - "Ask codex and agy to review this before we open a PR and come to a consensus" → Triggers **consensus-review**
 - Skills load only when needed, keeping context usage efficient
 

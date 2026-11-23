@@ -31,7 +31,8 @@
 # conversation: it is a review, but from exploration that was cut short.
 # reason comes from agy's own finished_reason when it gave one.
 #
-# Exit codes: 0 ok, 2 usage, 124 timeout, 127 agy not installed, 1 any other failure.
+# Exit codes: 0 ok, 2 usage, 124 timeout, 127 agy (or both jq and python3) not
+# installed, 1 any other failure.
 #
 # Environment:
 #   AGY_REVIEW_TIMEOUT  agy --print-timeout value (default 20m). The outer
@@ -164,6 +165,12 @@ fi
 if ! command -v agy >/dev/null 2>&1; then
   model=n/a
   status_line unavailable "agy-not-on-PATH"
+  exit 127
+fi
+
+if ! command -v jq >/dev/null 2>&1 && ! command -v python3 >/dev/null 2>&1; then
+  model=n/a
+  status_line unavailable "needs-jq-or-python3"
   exit 127
 fi
 
