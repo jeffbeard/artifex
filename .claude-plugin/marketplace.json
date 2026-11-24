@@ -12,7 +12,7 @@
       "name": "artifex",
       "source": "./",
       "description": "Claude Code skills: skill-finder (discovery + security review), project-namer (etymologically-grounded naming), and arxiv-search (academic paper search)",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "strict": false,
       "skills": [
         "./skills/arxiv-search",
