@@ -23,7 +23,9 @@ When adding or updating skills in this repository:
 2. Each skill should have a `SKILL.md` file with proper YAML frontmatter
 3. Include clear documentation with examples
 4. Test the skill before committing
-5. Update the README.md to document new skills
+5. Update the README.md to document new skills, including the skill's slash command (`/<plugin>:<skill>`)
+6. Bump the plugin's `version` in `.claude-plugin/marketplace.json` whenever a skill in that plugin changes. Installed plugins are cached by version, so a change shipped under the same version number does not reach existing installs
+7. Add a new skill to its plugin's `skills` list in `.claude-plugin/marketplace.json`
 
 ## Commit Messages
 

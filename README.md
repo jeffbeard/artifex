@@ -21,6 +21,8 @@ Artifex is my collection of skills for Claude Code.
 
 **Location:** `skills/skill-finder/`
 
+**Slash command:** `/artifex:skill-finder`
+
 
 ### project-namer
 **Description:** Use Claude to generate project names
@@ -36,6 +38,8 @@ Artifex is my collection of skills for Claude Code.
 
 **Location:** `skills/project-namer/`
 
+**Slash command:** `/artifex:project-namer`
+
 ### arxiv-search
 **Description:** Search and retrieve academic papers from ArXiv (arxiv.org).
 
@@ -48,6 +52,8 @@ Artifex is my collection of skills for Claude Code.
 - No dependency on unstable MCP servers
 
 **Location:** `skills/arxiv-search/`
+
+**Slash command:** `/artifex:arxiv-search`
 
 ## Synoptix: multi-agent code review
 
@@ -85,6 +91,8 @@ At least one of `codex` and `agy` is needed for an outside review. The skill che
 
 **Location:** `skills/consensus-review/`
 
+**Slash command:** `/cross-agent:consensus-review`
+
 ## Installation
 
 Artifex is a Claude Code plugin marketplace. Install all skills in one shot from inside Claude Code:
@@ -100,10 +108,22 @@ The cross-agent review skill (`consensus-review`) ships as a separate plugin, `c
 /plugin install cross-agent@artifex
 ```
 
+The install asks for a scope. A plugin installed at user scope is available in every project. A plugin installed at project scope is available only in the project where you installed it, so run the install again in each other project that needs it.
+
 To pull updates later:
 
 ```
 /plugin marketplace update artifex
+/reload-plugins
+```
+
+The first command fetches the latest marketplace from GitHub. The second loads the new version into the running session; restarting Claude Code does the same. Sessions in other projects need their own reload or restart.
+
+If a plugin still shows the old version after that, uninstall and reinstall it:
+
+```
+/plugin uninstall artifex@artifex
+/plugin install artifex@artifex
 ```
 
 ### Manual installation (alternative)
@@ -126,6 +146,25 @@ Once installed, Claude Code automatically discovers and uses skills based on you
 - "Ask agy to review the current OpenSpec change" → Triggers **consensus-review**
 - "Ask codex and agy to review this before we open a PR and come to a consensus" → Triggers **consensus-review**
 - Skills load only when needed, keeping context usage efficient
+
+### Slash commands
+
+Each skill can also be run by name. The command is the plugin name, a colon, then the skill name:
+
+| Skill | Plugin | Slash command |
+|---|---|---|
+| skill-finder | `artifex` | `/artifex:skill-finder` |
+| project-namer | `artifex` | `/artifex:project-namer` |
+| arxiv-search | `artifex` | `/artifex:arxiv-search` |
+| consensus-review | `cross-agent` | `/cross-agent:consensus-review` |
+
+Text after the command is passed to the skill as the request:
+
+```
+/cross-agent:consensus-review codex and agy, review the current OpenSpec change
+```
+
+Type `/artifex` or `/cross-agent` in Claude Code to see the commands from the plugins you have installed. Skills copied in by hand (see Manual installation) have no plugin prefix, for example `/skill-finder`.
 
 
 ## Contributing
