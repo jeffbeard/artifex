@@ -1,3 +1,5 @@
+![Artifex: the letter A drawn as a pair of craftsman's dividers](assets/artifex-banner.svg)
+
 # Artifex
 
 > *Latin: craftsman, artist, maker*
